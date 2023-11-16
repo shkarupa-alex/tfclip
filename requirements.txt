@@ -1,0 +1,5 @@
+tensorflow>=2.13.0
+tensorflow_text>=2.13.0
+keras>=2.13.0
+numpy>=1.24.3
+ftfy>=6.1.1
