@@ -29,15 +29,16 @@ def TextTransformer(embed_dim, text_cfg, quick_gelu, custom=False, name='text'):
 
     # Define model pipeline
     x = text
-    x = layers.Embedding(
-        text_cfg.vocab_size, text_cfg.width, mask_zero=not text_cfg.no_causal_mask, name=f'{name}/token/embed')(x)
+    x = layers.Embedding(text_cfg.vocab_size, text_cfg.width, name=f'{name}/token/embed')(x)
+
     if use_cls:
         x = AddClassToken(name=f'{name}/token/cls')(x)
     x = TextPositionEmbedding(text_cfg.context_length + int(use_cls), name=f'{name}/token/pos')(x)
 
     for i in range(text_cfg.layers):
         y = layers.LayerNormalization(epsilon=ln_epsilon, name=f'{name}/layer_{i}/attn/norm')(x)
-        y = layers.MultiHeadAttention(text_cfg.heads, head_width, name=f'{name}/layer_{i}/attn/mhsa')(y, y)
+        y = layers.MultiHeadAttention(text_cfg.heads, head_width, name=f'{name}/layer_{i}/attn/mhsa')(
+            y, y, use_causal_mask=not text_cfg.no_causal_mask)
         if text_cfg.ls_init_value is not None:
             y = LayerScale(name=f'{name}/layer_{i}/attn/scale')(y)
         x = layers.add([x, y], name=f'{name}/layer_{i}/attn/add')
@@ -52,11 +53,11 @@ def TextTransformer(embed_dim, text_cfg, quick_gelu, custom=False, name='text'):
 
     if use_cls:
         # presence of appended cls embed (CoCa) overrides pool_type, always take last token
-        pooled, tokens = TextGlobalPool('last', name=f'{name}/head/pool')(x)
+        pooled, tokens = TextGlobalPool('last', name=f'{name}/head/pool')([x, text])
         pooled = layers.LayerNormalization(epsilon=ln_epsilon, name=f'{name}/head/norm')(pooled)
     else:
         x = layers.LayerNormalization(epsilon=ln_epsilon, name=f'{name}/head/norm')(x)
-        pooled, tokens = TextGlobalPool(text_cfg.pool_type, name=f'{name}/head/pool')(x)
+        pooled, tokens = TextGlobalPool(text_cfg.pool_type, name=f'{name}/head/pool')([x, text])
 
     pooled = layers.Dense(embed_dim, use_bias=text_cfg.proj_bias, name=f'{name}/head/proj')(pooled)
 

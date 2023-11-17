@@ -31,6 +31,9 @@ class ImageTextSimilarity(layers.Layer):
     def call(self, inputs, *args, **kwargs):
         image, text = inputs
 
+        image /= tf.norm(image, axis=-1, keepdims=True)
+        text /= tf.norm(text, axis=-1, keepdims=True)
+
         outputs = tf.matmul(image * self.scale, text, transpose_b=True)
         if self.bias_init:
             outputs += self.bias

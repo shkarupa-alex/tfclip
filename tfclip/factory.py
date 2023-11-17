@@ -2,6 +2,7 @@ import json
 import re
 from copy import deepcopy
 from dataclasses import asdict
+from keras.src.utils import data_utils
 from pathlib import Path
 from tfclip.tokenizer import SimpleTokenizer, DEFAULT_CONTEXT_LENGTH
 from tfclip.transform import PreprocessCfg, merge_preprocess_dict
@@ -113,5 +114,14 @@ def create_model(model_name, pretrained=None, **model_kwargs):
                     **model_cfg, img_mean=preprocess_cfg['mean'], img_std=preprocess_cfg['std'], custom_text=True)
         else:
             model = CLIP(**model_cfg, img_mean=preprocess_cfg['mean'], img_std=preprocess_cfg['std'])
+
+        # Load weights.
+        if pretrained in {}:  # TODO
+            weights_url = ''
+            weights_hash = ''
+            weights_path = data_utils.get_file(origin=weights_url, file_hash=weights_hash, cache_subdir='tfvit')
+            model.load_weights(weights_path)
+        elif pretrained is not None:
+            model.load_weights(pretrained)
 
     return model

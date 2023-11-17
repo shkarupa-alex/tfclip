@@ -99,14 +99,9 @@ def CLIP(
         bias_init=None, custom_text=False):
 
     vision = _build_vision_tower(embed_dim, vision_cfg, quick_gelu, img_mean, img_std)
-    v = vision.outputs[0]
-    v = layers.Activation(lambda x: tf.math.l2_normalize(x, axis=-1), name='head/vision_norm')(v)
-
     text = _build_text_tower(embed_dim, text_cfg, quick_gelu, custom=custom_text)
-    t = text.outputs[0]
-    t = layers.Activation(lambda x: tf.math.l2_normalize(x, axis=-1), name='head/text_norm')(t)
 
-    s = ImageTextSimilarity(scale_init, bias_init, name='head/sim')([v, t])
+    s = ImageTextSimilarity(scale_init, bias_init, name='head/sim')([vision.outputs[0], text.outputs[0]])
     s = layers.Activation('softmax', name='head/prob')(s)
 
     model = models.Model(inputs=[vision.inputs[0], text.inputs[0]], outputs=s, name='clip')

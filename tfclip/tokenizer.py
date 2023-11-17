@@ -165,7 +165,7 @@ class SimpleTokenizer(object):
         assert context_length, 'Please set a valid context length'
 
         all_tokens = [[self.sot_token_id] + self.encode(text) + [self.eot_token_id] for text in texts]
-        result = np.zeros(len(all_tokens), context_length, dtype=np.int64)
+        result = np.zeros([len(all_tokens), context_length], dtype=np.int64)
 
         for i, tokens in enumerate(all_tokens):
             if len(tokens) > context_length:
