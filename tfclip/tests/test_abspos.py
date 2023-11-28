@@ -8,10 +8,18 @@ class TestImagePositionEmbedding(test_combinations.TestCase):
     def test_layer(self):
         test_utils.layer_test(
             ImagePositionEmbedding,
-            kwargs={'patch_size': 16, 'pretrain_size': 224},
+            kwargs={'patch_size': 16, 'pretrain_size': 224, 'cls_tok': True},
             input_shape=[2, 14 ** 2 + 1, 8],
             input_dtype='float32',
             expected_output_shape=[None, 14 ** 2 + 1, 8],
+            expected_output_dtype='float32'
+        )
+        test_utils.layer_test(
+            ImagePositionEmbedding,
+            kwargs={'patch_size': 16, 'pretrain_size': 224, 'cls_tok': False},
+            input_shape=[2, 14 ** 2, 8],
+            input_dtype='float32',
+            expected_output_shape=[None, 14 ** 2, 8],
             expected_output_dtype='float32'
         )
 

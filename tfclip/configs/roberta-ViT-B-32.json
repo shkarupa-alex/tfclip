@@ -1,4 +1,5 @@
 {
+    "disabled": true,
     "embed_dim": 512,
     "quick_gelu": true,
     "vision_cfg": {

@@ -4,15 +4,21 @@
     "custom_text": true,
     "vision_cfg": {
         "image_size": 256,
-        "timm_model_name": "vit_base_patch16_siglip_256",
-        "timm_model_pretrained": false,
-        "timm_pool": "map",
-        "timm_proj": "none"
+        "layers": 12,
+        "width": 768,
+        "patch_size": 16,
+        "patch_bias": true,
+        "embed_cls": false,
+        "no_ln_pre": true,
+        "ma_pool": true,
+        "norm_kwargs":{
+            "eps": 1e-6
+        }
     },
     "text_cfg": {
         "context_length": 64,
         "vocab_size": 250000,
-        "hf_tokenizer_name": "timm/ViT-B-16-SigLIP-i18n-256",
+        "sp_tokenizer_name": "1.0.0/sentencepiece_mc4_250k__ef78f86560d809067d12bac6c09f19a462cb3af3f54d2b8acbba26e1433125d6",
         "tokenizer_kwargs": {
             "clean": "canonicalize"
         },

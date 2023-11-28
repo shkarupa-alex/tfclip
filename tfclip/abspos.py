@@ -6,12 +6,13 @@ from keras.src.utils.tf_utils import shape_type_conversion
 
 @register_keras_serializable(package='TFCLIP')
 class ImagePositionEmbedding(layers.Layer):
-    def __init__(self, patch_size, pretrain_size, **kwargs):
+    def __init__(self, patch_size, pretrain_size, cls_tok=True, **kwargs):
         super().__init__(**kwargs)
         self.input_spec = layers.InputSpec(ndim=3)
 
         self.patch_size = patch_size
         self.pretrain_size = pretrain_size
+        self.cls_tok = cls_tok
 
     @shape_type_conversion
     def build(self, input_shape):
@@ -20,7 +21,7 @@ class ImagePositionEmbedding(layers.Layer):
             raise ValueError('Channel dimension of the inputs should be defined. Found `None`.')
         self.input_spec = layers.InputSpec(ndim=3, axes={-1: channels})
 
-        current_patches = (self.pretrain_size // self.patch_size) ** 2 + 1
+        current_patches = (self.pretrain_size // self.patch_size) ** 2 + int(self.cls_tok)
 
         # noinspection PyAttributeOutsideInit
         self.embedding = self.add_weight(
@@ -42,14 +43,14 @@ class ImagePositionEmbedding(layers.Layer):
                     f'weight shape {weights[0].shape}.'
                 )
 
-            current_size = int((weights[0].shape[1] - 1) ** 0.5 * self.patch_size)
+            current_size = int((weights[0].shape[1] - int(self.cls_tok)) ** 0.5 * self.patch_size)
             if self.pretrain_size != current_size:
                 tf.get_logger().info(
                     f'Resizing absolute position embeddings from {current_size} to {self.pretrain_size}')
                 pretrain_patches = self.pretrain_size // self.patch_size
                 current_patches = current_size // self.patch_size
 
-                cls_embed, pos_embed = weights[0][:, :1], weights[0][:, 1:]
+                cls_embed, pos_embed = weights[0][:, :int(self.cls_tok)], weights[0][:, int(self.cls_tok):]
                 pos_embed = tf.reshape(pos_embed, [1, current_patches, current_patches, -1])
                 pos_embed = tf.image.resize(
                     pos_embed, [pretrain_patches, pretrain_patches], method=tf.image.ResizeMethod.BICUBIC)
@@ -72,7 +73,8 @@ class ImagePositionEmbedding(layers.Layer):
         config = super().get_config()
         config.update({
             'patch_size': self.patch_size,
-            'pretrain_size': self.pretrain_size
+            'pretrain_size': self.pretrain_size,
+            'cls_tok': self.cls_tok
         })
 
         return config

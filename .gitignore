@@ -108,4 +108,5 @@ ENV/
 *.whl
 *.pth
 tfclip/tests/data
+tfclip/tests/test_weights.py
 weights/

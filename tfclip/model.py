@@ -1,5 +1,4 @@
 import numpy as np
-import tensorflow as tf
 from dataclasses import dataclass
 from keras import layers, models
 from typing import Optional, Tuple, Union
@@ -15,13 +14,16 @@ class CLIPVisionCfg:
     head_width: int = 64
     mlp_ratio: float = 4.0
     patch_size: int = 16
+    patch_bias: bool = False
     image_size: Union[Tuple[int, int], int] = 224
 
+    embed_cls: bool = True
     ls_init_value: Optional[float] = None
     patch_dropout: float = 0.
     attentional_pool: bool = False
     attn_pooler_queries: int = 256
     attn_pooler_heads: int = 8
+    ma_pool: bool = False
     no_ln_pre: bool = False
     pos_embed_type: str = 'learnable'
     final_ln_after_pool: bool = False
@@ -67,6 +69,10 @@ class CLIPTextCfg:
     hf_proj_type: str = 'mlp'
     hf_pooler_type: str = 'mean_pooler'  # attentional pooling for HF models
 
+    # TensorFlow specific text tower config
+    sp_tokenizer_name: Optional[str] = None
+    hub_tokenizer_name: Optional[str] = None
+
 
 def _build_vision_tower(embed_dim, vision_cfg, quick_gelu, img_mean, img_std):
     if isinstance(vision_cfg, dict):
@@ -102,7 +108,7 @@ def CLIP(
     text = _build_text_tower(embed_dim, text_cfg, quick_gelu, custom=custom_text)
 
     s = ImageTextSimilarity(scale_init, bias_init, name='head/sim')([vision.outputs[0], text.outputs[0]])
-    s = layers.Activation('softmax', name='head/prob')(s)
+    s = layers.Activation('softmax', name='head/prob', dtype='float32')(s)
 
     model = models.Model(inputs=[vision.inputs[0], text.inputs[0]], outputs=s, name='clip')
 

@@ -5,6 +5,7 @@ from tfclip.abspos import ImagePositionEmbedding
 from tfclip.attnpool import AttentionalPooler
 from tfclip.clstok import AddClassToken, SplitClassToken
 from tfclip.lscale import LayerScale
+from tfclip.mapool import MultiheadAttentionPooling
 from tfclip.qgelu import q_gelu
 
 
@@ -46,12 +47,14 @@ def VisionTransformer(embed_dim, vision_cfg, quick_gelu, img_mean, img_std, name
     x = layers.Normalization(
         mean=np.array(img_mean) * 255., variance=(np.array(img_std) * 255.) ** 2, name=f'{name}/image/norm')(x)
     x = layers.Conv2D(
-        vision_cfg.width, vision_cfg.patch_size, strides=vision_cfg.patch_size, use_bias=False,
+        vision_cfg.width, vision_cfg.patch_size, strides=vision_cfg.patch_size, use_bias=vision_cfg.patch_bias,
         name=f'{name}/patch/embed')(x)
     x = layers.Reshape(
         [(vision_cfg.image_size // vision_cfg.patch_size) ** 2, vision_cfg.width], name=f'{name}/patch/flatten')(x)
-    x = AddClassToken(name=f'{name}/patch/cls')(x)
-    x = ImagePositionEmbedding(vision_cfg.patch_size, vision_cfg.image_size, name=f'{name}/patch/pos')(x)
+    if vision_cfg.embed_cls:
+        x = AddClassToken(name=f'{name}/patch/cls')(x)
+    x = ImagePositionEmbedding(
+        vision_cfg.patch_size, vision_cfg.image_size, cls_tok=vision_cfg.embed_cls, name=f'{name}/patch/pos')(x)
     if not vision_cfg.no_ln_pre:
         x = layers.LayerNormalization(epsilon=ln_epsilon, name=f'{name}/patch/norm')(x)
 
@@ -71,44 +74,56 @@ def VisionTransformer(embed_dim, vision_cfg, quick_gelu, img_mean, img_std, name
             y = LayerScale(name=f'{name}/layer_{i}/mlp/scale')(y)
         x = layers.add([x, y], name=f'{name}/layer_{i}/mlp/add')
 
+    x = layers.Activation('linear', name=f'{name}/head/in')(x)
+
     if vision_cfg.attentional_pool:
         x = AttentionalPooler(
             embed_dim, vision_cfg.attn_pooler_heads, vision_cfg.attn_pooler_queries, epsilon=ln_epsilon,
-            name=f'{name}/head/attn')(x)
+            name=f'{name}/head/attnpool')(x)
         x = layers.LayerNormalization(epsilon=ln_epsilon, name=f'{name}/head/norm')(x)
-        pooled, tokens = GlobalPool(
-            vision_cfg.pool_type, vision_cfg.patch_size, vision_cfg.image_size, name=f'{name}/head/pool')(x)
+        pooled = GlobalPool(vision_cfg.pool_type, name=f'{name}/head/pool')(x)
+    elif vision_cfg.ma_pool:
+        pooled = layers.LayerNormalization(epsilon=ln_epsilon, name=f'{name}/head/norm')(x)
+        pooled = MultiheadAttentionPooling(num_heads, name=f'{name}/head/mapool')(pooled)
+        y = layers.LayerNormalization(epsilon=ln_epsilon, name=f'{name}/head/mapool/mlp/norm')(pooled)
+        y = layers.Dense(int(vision_cfg.width * vision_cfg.mlp_ratio), name=f'{name}/head/mapool/mlp/expand')(y)
+        y = layers.Activation(mlp_act, name=f'{name}/head/mapool/mlp/act')(y)
+        y = layers.Dense(vision_cfg.width, name=f'{name}/head/mapool/mlp/squeeze')(y)
+        pooled = layers.add([pooled, y], name=f'{name}/head/mapool/mlp/add')
+        pooled = GlobalPool('first', name=f'{name}/head/pool')(pooled)
     elif vision_cfg.final_ln_after_pool:
-        pooled, tokens = GlobalPool(
-            vision_cfg.pool_type, vision_cfg.patch_size, vision_cfg.image_size, name=f'{name}/head/pool')(x)
+        pooled = GlobalPool(vision_cfg.pool_type, name=f'{name}/head/pool')(x)
         pooled = layers.LayerNormalization(epsilon=ln_epsilon, name=f'{name}/head/norm')(pooled)
     else:
         x = layers.LayerNormalization(epsilon=ln_epsilon, name=f'{name}/head/norm')(x)
-        pooled, tokens = GlobalPool(
-            vision_cfg.pool_type, vision_cfg.patch_size, vision_cfg.image_size, name=f'{name}/head/pool')(x)
+        pooled = GlobalPool(vision_cfg.pool_type, name=f'{name}/head/pool')(x)
 
-    pooled = layers.Dense(embed_dim, use_bias=False, name=f'{name}/head/proj')(pooled)
+    if not vision_cfg.ma_pool:
+        pooled = layers.Dense(embed_dim, use_bias=False, name=f'{name}/head/proj')(pooled)
 
-    outputs = [pooled, tokens] if vision_cfg.output_tokens else pooled
-    model = models.Model(inputs=image, outputs=outputs, name=name)
+    pooled = layers.Activation('linear', name=f'{name}/head/out')(pooled)
+
+    model = models.Model(inputs=image, outputs=pooled, name=name)
 
     return model
 
 
-def GlobalPool(pool_type, patch_size, image_size, name=None):
+def GlobalPool(pool_type, name=None):
     if name is None:
         counter = backend.get_uid('global_pool')
         name = f'global_pool_{counter}'
 
     def apply(inputs):
         if 'avg' == pool_type:
-            _, tokens = SplitClassToken(patch_size, image_size, name=f'{name}/split')(inputs)
-            pooled = layers.GlobalAvgPool2D(name=f'{name}/avg')(tokens)
+            _, tokens = SplitClassToken(name=f'{name}/split')(inputs)
+            pooled = layers.GlobalAvgPool1D(name=f'{name}/avg')(tokens)
         elif 'tok' == pool_type:
-            pooled, tokens = SplitClassToken(patch_size, image_size, name=f'{name}/split')(inputs)
+            pooled, _ = SplitClassToken(name=f'{name}/split')(inputs)
+        elif 'first' == pool_type:
+            pooled, _ = SplitClassToken(name=f'{name}/split')(inputs)
         else:
-            pooled = tokens = inputs
+            pooled = inputs
 
-        return pooled, tokens
+        return pooled
 
     return apply

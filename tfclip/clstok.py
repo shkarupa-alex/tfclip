@@ -6,9 +6,10 @@ from keras.src.utils.tf_utils import shape_type_conversion
 
 @register_keras_serializable(package='TFCLIP')
 class AddClassToken(layers.Layer):
-    def __init__(self, **kwargs):
+    def __init__(self, first=True, **kwargs):
         super().__init__(**kwargs)
         self.input_spec = layers.InputSpec(ndim=3)
+        self.first = first
 
     @shape_type_conversion
     def build(self, input_shape):
@@ -25,7 +26,9 @@ class AddClassToken(layers.Layer):
     def call(self, inputs, *args, **kwargs):
         batch_size = tf.shape(inputs)[0]
         cls_token = tf.repeat(self.token, batch_size, axis=0)
-        outputs = tf.concat([cls_token, inputs], axis=1)
+
+        outputs = [cls_token, inputs] if self.first else [inputs, cls_token]
+        outputs = tf.concat(outputs, axis=1)
 
         return outputs
 
@@ -34,7 +37,9 @@ class AddClassToken(layers.Layer):
             return None
 
         token_mask = tf.ones_like(mask[:, :1], dtype='bool')
-        mask = tf.concat([token_mask, mask], axis=1)
+
+        mask = [token_mask, mask] if self.first else [mask, token_mask]
+        mask = tf.concat(mask, axis=1)
 
         return mask
 
@@ -46,15 +51,19 @@ class AddClassToken(layers.Layer):
 
         return input_shape[:1] + (length + 1,) + input_shape[2:]
 
+    def get_config(self):
+        config = super().get_config()
+        config.update({'first': self.first})
+
+        return config
+
 
 @register_keras_serializable(package='TFCLIP')
 class SplitClassToken(layers.Layer):
-    def __init__(self, patch_size, current_size, **kwargs):
+    def __init__(self, first=True, **kwargs):
         super().__init__(**kwargs)
         self.input_spec = layers.InputSpec(ndim=3)
-
-        self.patch_size = patch_size
-        self.current_size = current_size
+        self.first = first
 
     @shape_type_conversion
     def build(self, input_shape):
@@ -64,30 +73,26 @@ class SplitClassToken(layers.Layer):
             raise ValueError('Channel dimensions of the inputs should be defined. Found `None`.')
         self.input_spec = layers.InputSpec(ndim=3, axes={-1: self.channels})
 
-        # noinspection PyAttributeOutsideInit
-        self.features_size = self.current_size // self.patch_size
-
         super().build(input_shape)
 
     def call(self, inputs, *args, **kwargs):
-        token, features = tf.split(inputs, [1, self.features_size ** 2], axis=1)
+        if self.first:
+            token, features = tf.split(inputs, [1, -1], axis=1)
+        else:
+            features, token = tf.split(inputs, [-1, 1], axis=1)
         token = tf.reshape(token, [-1, self.channels])
-        features = tf.reshape(features, [-1, self.features_size, self.features_size, self.channels])
 
         return token, features
 
     @shape_type_conversion
     def compute_output_shape(self, input_shape):
-        features_shape = input_shape[:1] + (self.features_size, self.features_size, self.channels)
         token_shape = input_shape[:1] + (self.channels,)
+        features_shape = input_shape[:1] + (None if input_shape[1] is None else input_shape[1] - 1, self.channels)
 
         return token_shape, features_shape
 
     def get_config(self):
         config = super().get_config()
-        config.update({
-            'patch_size': self.patch_size,
-            'current_size': self.current_size
-        })
+        config.update({'first': self.first})
 
         return config

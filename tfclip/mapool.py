@@ -5,14 +5,11 @@ from keras.src.utils.tf_utils import shape_type_conversion
 
 
 @register_keras_serializable(package='TFCLIP')
-class AttentionalPooler(layers.Layer):
-    def __init__(self, units, heads, queries, epsilon=1e-3, **kwargs):
+class MultiheadAttentionPooling(layers.Layer):
+    def __init__(self, heads, **kwargs):
         super().__init__(**kwargs)
         self.input_spec = layers.InputSpec(ndim=3)
-        self.units = units
         self.heads = heads
-        self.queries = queries
-        self.epsilon = epsilon
 
     @shape_type_conversion
     def build(self, input_shape):
@@ -22,41 +19,27 @@ class AttentionalPooler(layers.Layer):
         self.input_spec = layers.InputSpec(ndim=3, axes={-1: channels})
 
         # noinspection PyAttributeOutsideInit
-        self.query = self.add_weight(name='query', shape=(1, self.queries, self.units))
+        self.query = self.add_weight(name='probe', shape=(1, 1, channels))
 
         # noinspection PyAttributeOutsideInit
-        self.mhsa = layers.MultiHeadAttention(self.heads, self.units // self.heads, name='mhsa')
-
-        # noinspection PyAttributeOutsideInit
-        self.ln_q = layers.LayerNormalization(epsilon=self.epsilon, name='ln_q')
-
-        # noinspection PyAttributeOutsideInit
-        self.ln_k = layers.LayerNormalization(epsilon=self.epsilon, name='ln_k')
+        self.mhsa = layers.MultiHeadAttention(self.heads, channels // self.heads, name='mhsa')
 
         super().build(input_shape)
 
     def call(self, inputs, *args, **kwargs):
         batch = tf.shape(inputs)[0]
 
-        q = self.ln_q(self.query)
-        q = tf.repeat(q, batch, axis=0)
-
-        k = self.ln_k(inputs)
-        x = self.mhsa(q, k)
+        q = tf.repeat(self.query, batch, axis=0)
+        x = self.mhsa(q, inputs)
 
         return x
 
     @shape_type_conversion
     def compute_output_shape(self, input_shape):
-        return input_shape[:1] + (self.queries, self.units)
+        return input_shape[:1] + (1,) + input_shape[-1:]
 
     def get_config(self):
         config = super().get_config()
-        config.update({
-            'units': self.units,
-            'heads': self.heads,
-            'queries': self.queries,
-            'epsilon': self.epsilon
-        })
+        config.update({'heads': self.heads})
 
         return config

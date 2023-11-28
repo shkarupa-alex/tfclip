@@ -1,3 +1,4 @@
+import numpy as np
 import tensorflow as tf
 from keras import initializers, layers
 from keras.saving import register_keras_serializable
@@ -18,7 +19,8 @@ class ImageTextSimilarity(layers.Layer):
         # noinspection PyAttributeOutsideInit
         self.scale = self.add_weight(
             'scale', shape=[],
-            initializer=initializers.constant(self.scale_init))
+            initializer=initializers.constant(self.scale_init),
+            constraint=lambda s: tf.minimum(s, np.log(100., dtype=self.dtype)))
 
         if self.bias_init:
             # noinspection PyAttributeOutsideInit
@@ -34,7 +36,7 @@ class ImageTextSimilarity(layers.Layer):
         image /= tf.norm(image, axis=-1, keepdims=True)
         text /= tf.norm(text, axis=-1, keepdims=True)
 
-        outputs = tf.matmul(image * self.scale, text, transpose_b=True)
+        outputs = tf.matmul(image * tf.exp(self.scale), text, transpose_b=True)
         if self.bias_init:
             outputs += self.bias
 
