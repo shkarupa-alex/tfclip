@@ -77,71 +77,78 @@ print('Label probs:', text_probs)  # [[2.3066459e-06 3.2963297e-07 1.9622959e-08
 # open_clip: [[2.4752687e-06 3.3843190e-07 2.0362965e-08 9.9999714e-01]]
 ```
 
-## Ported models and weights
+## Models and weights
 
-- coca_ViT-B-32: laion2b_s13b_b90k, mscoco_finetuned_laion2b_s13b_b90k
-- coca_ViT-L-14: laion2b_s13b_b90k, mscoco_finetuned_laion2b_s13b_b90k
-- <i style="color:red">convnext_base: laion400m_s13b_b51k</i>
-- <i style="color:red">convnext_base_w: laion2b_s13b_b82k, laion2b_s13b_b82k_augreg, laion_aesthetic_s13b_b82k</i>
-- <i style="color:red">convnext_base_w_320: laion_aesthetic_s13b_b82k, laion_aesthetic_s13b_b82k_augreg</i>
-- <i style="color:red">convnext_large_d: laion2b_s26b_b102k_augreg</i>
-- <i style="color:red">convnext_large_d_320: laion2b_s29b_b131k_ft, laion2b_s29b_b131k_ft_soup</i>
-- <i style="color:red">convnext_xxlarge: laion2b_s34b_b82k_augreg, laion2b_s34b_b82k_augreg_rewind,
-  laion2b_s34b_b82k_augreg_soup</i>
-- <i style="color:red">EVA01-g-14: laion400m_s11b_b41k</i>
-- <i style="color:red">EVA01-g-14-plus: merged2b_s11b_b114k</i>
-- <i style="color:red">EVA02-B-16: merged2b_s8b_b131k</i>
-- <i style="color:red">EVA02-E-14: laion2b_s4b_b115k</i>
-- <i style="color:red">EVA02-E-14-plus: laion2b_s9b_b144k</i>
-- <i style="color:red">EVA02-L-14: merged2b_s4b_b131k</i>
-- <i style="color:red">EVA02-L-14-336: merged2b_s6b_b61k</i>
-- <i style="color:red">nllb-clip-base: v1</i>
-- <i style="color:red">nllb-clip-large: v1</i>
-- <i style="color:red">RN50: openai, yfcc15m, cc12m</i>
-- <i style="color:red">RN50-quickgelu: openai, yfcc15m, cc12m</i>
-- <i style="color:red">RN50x4: openai</i>
-- <i style="color:red">RN50x16: openai</i>
-- <i style="color:red">RN50x64: openai</i>
-- <i style="color:red">RN101: openai, yfcc15m</i>
-- <i style="color:red">RN101-quickgelu: openai, yfcc15m</i>
-- <i style="color:red">roberta-ViT-B-32: laion2b_s12b_b32k</i>
-- ViT-B-16: laion400m_e31, laion400m_e32, laion2b_s34b_b88k, datacomp_xl_s13b_b90k, datacomp_l_s1b_b8k,
-  commonpool_l_clip_s1b_b8k, commonpool_l_laion_s1b_b8k, commonpool_l_image_s1b_b8k, commonpool_l_text_s1b_b8k,
-  commonpool_l_basic_s1b_b8k, commonpool_l_s1b_b8k
-- ViT-B-16-plus-240: laion400m_e31, laion400m_e32
-- ViT-B-16-quickgelu: openai, metaclip_400m, metaclip_fullcc
-- ViT-B-16-SigLIP: webli
-- ViT-B-16-SigLIP-256: webli
-- ViT-B-16-SigLIP-384: webli
-- ViT-B-16-SigLIP-512: webli
-- ViT-B-16-SigLIP-i18n-256: webli
-- ViT-B-32: laion400m_e31, laion400m_e32, laion2b_e16, laion2b_s34b_b79k, datacomp_xl_s13b_b90k, datacomp_m_s128m_b4k,
-  commonpool_m_clip_s128m_b4k, commonpool_m_laion_s128m_b4k, commonpool_m_image_s128m_b4k, commonpool_m_text_s128m_b4k,
-  commonpool_m_basic_s128m_b4k, commonpool_m_s128m_b4k, datacomp_s_s13m_b4k, commonpool_s_clip_s13m_b4k,
-  commonpool_s_laion_s13m_b4k, commonpool_s_image_s13m_b4k, commonpool_s_text_s13m_b4k, commonpool_s_basic_s13m_b4k,
-  commonpool_s_s13m_b4k
-- ViT-B-32-256: datacomp_s34b_b86k
-- ViT-B-32-quickgelu: openai, laion400m_e31, laion400m_e32, metaclip_400m, metaclip_fullcc
-- ViT-bigG-14: laion2b_s39b_b160k
-- ViT-bigG-14-CLIPA: datacomp1b
-- ViT-bigG-14-CLIPA-336: datacomp1b
-- ViT-g-14: laion2b_s12b_b42k, laion2b_s34b_b88k
-- ViT-H-14: laion2b_s32b_b79k
-- ViT-H-14-CLIPA: datacomp1b
-- ViT-H-14-CLIPA-336-quickgelu: laion2b, datacomp1b
-- ViT-H-14-quickgelu: metaclip_fullcc
-- ViT-L-14: laion400m_e31, laion400m_e32, laion2b_s32b_b82k, datacomp_xl_s13b_b90k, commonpool_xl_clip_s13b_b90k,
-  commonpool_xl_laion_s13b_b90k, commonpool_xl_s13b_b90k
-- ViT-L-14-336-quickgelu: openai
-- ViT-L-14-CLIPA: datacomp1b
-- ViT-L-14-CLIPA-336: datacomp1b
-- ViT-L-14-quickgelu: openai, metaclip_400m, metaclip_fullcc
-- ViT-L-16-SigLIP-256: webli
-- ViT-L-16-SigLIP-384: webli
-- ViT-SO400M-14-SigLIP: webli
-- ViT-SO400M-14-SigLIP-384: webli
-- <i style="color:red">xlm-roberta-base-ViT-B-32: laion5b_s13b_b90k</i>
-- <i style="color:red">xlm-roberta-large-ViT-H-14: frozen_laion5b_s13b_b90k</i>
+> [!TIP]
+> Fully ported
+> - coca_ViT-B-32: laion2b_s13b_b90k, mscoco_finetuned_laion2b_s13b_b90k
+> - coca_ViT-L-14: laion2b_s13b_b90k, mscoco_finetuned_laion2b_s13b_b90k
+> - ViT-B-16: laion400m_e31, laion400m_e32, laion2b_s34b_b88k, datacomp_xl_s13b_b90k, datacomp_l_s1b_b8k,
+    commonpool_l_clip_s1b_b8k, commonpool_l_laion_s1b_b8k, commonpool_l_image_s1b_b8k, commonpool_l_text_s1b_b8k,
+    commonpool_l_basic_s1b_b8k, commonpool_l_s1b_b8k
+> - ViT-B-16-plus-240: laion400m_e31, laion400m_e32
+> - ViT-B-16-quickgelu: openai, metaclip_400m, metaclip_fullcc
+> - ViT-B-16-SigLIP: webli
+> - ViT-B-16-SigLIP-256: webli
+> - ViT-B-16-SigLIP-384: webli
+> - ViT-B-16-SigLIP-512: webli
+> - ViT-B-16-SigLIP-i18n-256: webli
+> - ViT-B-32: laion400m_e31, laion400m_e32, laion2b_e16, laion2b_s34b_b79k, datacomp_xl_s13b_b90k, datacomp_m_s128m_b4k,
+    commonpool_m_clip_s128m_b4k, commonpool_m_laion_s128m_b4k, commonpool_m_image_s128m_b4k,
+    commonpool_m_text_s128m_b4k, commonpool_m_basic_s128m_b4k, commonpool_m_s128m_b4k, datacomp_s_s13m_b4k,
+    commonpool_s_clip_s13m_b4k, commonpool_s_laion_s13m_b4k, commonpool_s_image_s13m_b4k, commonpool_s_text_s13m_b4k,
+    commonpool_s_basic_s13m_b4k, commonpool_s_s13m_b4k
+> - ViT-B-32-256: datacomp_s34b_b86k
+> - ViT-B-32-quickgelu: openai, laion400m_e31, laion400m_e32, metaclip_400m, metaclip_fullcc
+> - ViT-L-14: laion400m_e31, laion400m_e32, laion2b_s32b_b82k, datacomp_xl_s13b_b90k, commonpool_xl_clip_s13b_b90k,
+    commonpool_xl_laion_s13b_b90k, commonpool_xl_s13b_b90k
+> - ViT-L-14-336-quickgelu: openai
+> - ViT-L-14-CLIPA: datacomp1b
+> - ViT-L-14-CLIPA-336: datacomp1b
+> - ViT-L-14-quickgelu: openai, metaclip_400m, metaclip_fullcc
+
+> [!WARNING]
+> Local weight conversion required
+> - ViT-bigG-14: laion2b_s39b_b160k
+> - ViT-bigG-14-CLIPA: datacomp1b
+> - ViT-bigG-14-CLIPA-336: datacomp1b
+> - ViT-g-14: laion2b_s12b_b42k, laion2b_s34b_b88k
+> - ViT-H-14: laion2b_s32b_b79k
+> - ViT-H-14-CLIPA: datacomp1b
+> - ViT-H-14-CLIPA-336-quickgelu: laion2b, datacomp1b
+> - ViT-H-14-quickgelu: metaclip_fullcc
+> - ViT-L-16-SigLIP-256: webli
+> - ViT-L-16-SigLIP-384: webli
+> - ViT-SO400M-14-SigLIP: webli
+> - ViT-SO400M-14-SigLIP-384: webli
+
+> [!CAUTION]
+> Not ported
+> - convnext_base: laion400m_s13b_b51k
+> - convnext_base_w: laion2b_s13b_b82k, laion2b_s13b_b82k_augreg, laion_aesthetic_s13b_b82k
+> - convnext_base_w_320: laion_aesthetic_s13b_b82k, laion_aesthetic_s13b_b82k_augreg
+> - convnext_large_d: laion2b_s26b_b102k_augreg
+> - convnext_large_d_320: laion2b_s29b_b131k_ft, laion2b_s29b_b131k_ft_soup
+> - convnext_xxlarge: laion2b_s34b_b82k_augreg, laion2b_s34b_b82k_augreg_rewind, laion2b_s34b_b82k_augreg_soup
+> - EVA01-g-14: laion400m_s11b_b41k
+> - EVA01-g-14-plus: merged2b_s11b_b114k
+> - EVA02-B-16: merged2b_s8b_b131k
+> - EVA02-E-14: laion2b_s4b_b115k
+> - EVA02-E-14-plus: laion2b_s9b_b144k
+> - EVA02-L-14: merged2b_s4b_b131k
+> - EVA02-L-14-336: merged2b_s6b_b61k
+> - nllb-clip-base: v1
+> - nllb-clip-large: v1
+> - RN50: openai, yfcc15m, cc12m
+> - RN50-quickgelu: openai, yfcc15m, cc12m
+> - RN50x4: openai
+> - RN50x16: openai
+> - RN50x64: openai
+> - RN101: openai, yfcc15m
+> - RN101-quickgelu: openai, yfcc15m
+> - roberta-ViT-B-32: laion2b_s12b_b32k
+> - xlm-roberta-base-ViT-B-32: laion5b_s13b_b90k
+> - xlm-roberta-large-ViT-H-14: frozen_laion5b_s13b_b90k
 
 ## Citation
 
