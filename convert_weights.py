@@ -136,7 +136,7 @@ def convert_name(n):
 
 
 if '__main__' == __name__:
-    clip_pretrained = open_clip.list_pretrained()
+    clip_pretrained = tfclip.list_pretrained()
     pretrained_models = list(set([p[0] for p in clip_pretrained]))
     pretrained_weights = list(set([p[1] for p in clip_pretrained]))
 

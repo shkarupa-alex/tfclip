@@ -80,7 +80,7 @@ print('Label probs:', text_probs)  # [[2.3066459e-06 3.2963297e-07 1.9622959e-08
 ## Models and weights
 
 > [!TIP]
-> Ported models and weights
+> Fully ported
 > - coca_ViT-B-32: laion2b_s13b_b90k, mscoco_finetuned_laion2b_s13b_b90k
 > - coca_ViT-L-14: laion2b_s13b_b90k, mscoco_finetuned_laion2b_s13b_b90k
 > - ViT-B-16: laion400m_e31, laion400m_e32, laion2b_s34b_b88k, datacomp_xl_s13b_b90k, datacomp_l_s1b_b8k,
@@ -100,6 +100,15 @@ print('Label probs:', text_probs)  # [[2.3066459e-06 3.2963297e-07 1.9622959e-08
     commonpool_s_basic_s13m_b4k, commonpool_s_s13m_b4k
 > - ViT-B-32-256: datacomp_s34b_b86k
 > - ViT-B-32-quickgelu: openai, laion400m_e31, laion400m_e32, metaclip_400m, metaclip_fullcc
+> - ViT-L-14: laion400m_e31, laion400m_e32, laion2b_s32b_b82k, datacomp_xl_s13b_b90k, commonpool_xl_clip_s13b_b90k,
+    commonpool_xl_laion_s13b_b90k, commonpool_xl_s13b_b90k
+> - ViT-L-14-336-quickgelu: openai
+> - ViT-L-14-CLIPA: datacomp1b
+> - ViT-L-14-CLIPA-336: datacomp1b
+> - ViT-L-14-quickgelu: openai, metaclip_400m, metaclip_fullcc
+
+> [!WARNING]
+> Local weight conversion required
 > - ViT-bigG-14: laion2b_s39b_b160k
 > - ViT-bigG-14-CLIPA: datacomp1b
 > - ViT-bigG-14-CLIPA-336: datacomp1b
@@ -108,12 +117,6 @@ print('Label probs:', text_probs)  # [[2.3066459e-06 3.2963297e-07 1.9622959e-08
 > - ViT-H-14-CLIPA: datacomp1b
 > - ViT-H-14-CLIPA-336-quickgelu: laion2b, datacomp1b
 > - ViT-H-14-quickgelu: metaclip_fullcc
-> - ViT-L-14: laion400m_e31, laion400m_e32, laion2b_s32b_b82k, datacomp_xl_s13b_b90k, commonpool_xl_clip_s13b_b90k,
-    commonpool_xl_laion_s13b_b90k, commonpool_xl_s13b_b90k
-> - ViT-L-14-336-quickgelu: openai
-> - ViT-L-14-CLIPA: datacomp1b
-> - ViT-L-14-CLIPA-336: datacomp1b
-> - ViT-L-14-quickgelu: openai, metaclip_400m, metaclip_fullcc
 > - ViT-L-16-SigLIP-256: webli
 > - ViT-L-16-SigLIP-384: webli
 > - ViT-SO400M-14-SigLIP: webli
