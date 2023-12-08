@@ -1,9 +1,11 @@
 import numpy as np
+import tensorflow as tf
 from keras import backend, layers, models
 from keras.src.applications import imagenet_utils
 from tfclip.abspos import ImagePositionEmbedding
 from tfclip.attnpool import AttentionalPooler
 from tfclip.clstok import AddClassToken, SplitClassToken
+from tfclip.evattn import EvaMultiHeadAttention
 from tfclip.lscale import LayerScale
 from tfclip.mapool import MultiheadAttentionPooling
 from tfclip.qgelu import q_gelu
@@ -33,7 +35,12 @@ def VisionTransformer(embed_dim, vision_cfg, quick_gelu, img_mean, img_std, name
     if 'learnable' != vision_cfg.pos_embed_type:
         raise ValueError(f'Unsupported positional embedding type in config: {vision_cfg.pos_embed_type}')
 
-    mlp_act = q_gelu if quick_gelu else 'gelu'
+    if vision_cfg.swi_glu:
+        mlp_act = 'silu'
+    elif quick_gelu:
+        mlp_act = q_gelu
+    else:
+        mlp_act = 'gelu'
 
     # Define model inputs
     input_shape = imagenet_utils.obtain_input_shape(
@@ -59,17 +66,40 @@ def VisionTransformer(embed_dim, vision_cfg, quick_gelu, img_mean, img_std, name
         x = layers.LayerNormalization(epsilon=ln_epsilon, name=f'{name}/patch/norm')(x)
 
     for i in range(vision_cfg.layers):
-        y = layers.LayerNormalization(epsilon=ln_epsilon, name=f'{name}/layer_{i}/attn/norm')(x)
-        y = layers.MultiHeadAttention(
-            num_heads, vision_cfg.width // num_heads, name=f'{name}/layer_{i}/attn/mhsa')(y, y)
+        if vision_cfg.post_norm:
+            y = x
+        else:
+            y = layers.LayerNormalization(epsilon=ln_epsilon, name=f'{name}/layer_{i}/attn/norm')(x)
+        if vision_cfg.attn_norm or vision_cfg.rpe_pretrain:
+            y = EvaMultiHeadAttention(
+                num_heads, vision_cfg.width // num_heads, norm_epsilon=ln_epsilon,
+                rpe_pretrain=vision_cfg.rpe_pretrain, name=f'{name}/layer_{i}/attn/mhsa')(y, y)
+        else:
+            y = layers.MultiHeadAttention(
+                num_heads, vision_cfg.width // num_heads, name=f'{name}/layer_{i}/attn/mhsa')(y, y)
+        if vision_cfg.post_norm:
+            y = layers.LayerNormalization(epsilon=ln_epsilon, name=f'{name}/layer_{i}/attn/norm')(y)
         if vision_cfg.ls_init_value is not None:
             y = LayerScale(name=f'{name}/layer_{i}/attn/scale')(y)
         x = layers.add([x, y], name=f'{name}/layer_{i}/attn/add')
 
-        y = layers.LayerNormalization(epsilon=ln_epsilon, name=f'{name}/layer_{i}/mlp/norm')(x)
-        y = layers.Dense(int(vision_cfg.width * vision_cfg.mlp_ratio), name=f'{name}/layer_{i}/mlp/expand')(y)
-        y = layers.Activation(mlp_act, name=f'{name}/layer_{i}/mlp/act')(y)
-        y = layers.Dense(vision_cfg.width, name=f'{name}/layer_{i}/mlp/squeeze')(y)
+        if vision_cfg.post_norm:
+            y = x
+        else:
+            y = layers.LayerNormalization(epsilon=ln_epsilon, name=f'{name}/layer_{i}/mlp/norm')(x)
+        if vision_cfg.swi_glu:
+            g = layers.Dense(int(vision_cfg.width * vision_cfg.mlp_ratio), name=f'{name}/layer_{i}/mlp/gate')(y)
+            g = layers.Activation(mlp_act, name=f'{name}/layer_{i}/mlp/act')(g)
+            y = layers.Dense(int(vision_cfg.width * vision_cfg.mlp_ratio), name=f'{name}/layer_{i}/mlp/expand')(y)
+            y = layers.multiply([y, g], name=f'{name}/layer_{i}/mlp/multiply')
+            y = layers.LayerNormalization(epsilon=ln_epsilon, name=f'{name}/layer_{i}/mlp/normalize')(y)
+            y = layers.Dense(vision_cfg.width, name=f'{name}/layer_{i}/mlp/squeeze')(y)
+        else:
+            y = layers.Dense(int(vision_cfg.width * vision_cfg.mlp_ratio), name=f'{name}/layer_{i}/mlp/expand')(y)
+            y = layers.Activation(mlp_act, name=f'{name}/layer_{i}/mlp/act')(y)
+            y = layers.Dense(vision_cfg.width, name=f'{name}/layer_{i}/mlp/squeeze')(y)
+        if vision_cfg.post_norm:
+            y = layers.LayerNormalization(epsilon=ln_epsilon, name=f'{name}/layer_{i}/mlp/norm')(y)
         if vision_cfg.ls_init_value is not None:
             y = LayerScale(name=f'{name}/layer_{i}/mlp/scale')(y)
         x = layers.add([x, y], name=f'{name}/layer_{i}/mlp/add')
@@ -99,7 +129,7 @@ def VisionTransformer(embed_dim, vision_cfg, quick_gelu, img_mean, img_std, name
         pooled = GlobalPool(vision_cfg.pool_type, name=f'{name}/head/pool')(x)
 
     if not vision_cfg.ma_pool:
-        pooled = layers.Dense(embed_dim, use_bias=False, name=f'{name}/head/proj')(pooled)
+        pooled = layers.Dense(embed_dim, use_bias=vision_cfg.proj_bias, name=f'{name}/head/proj')(pooled)
 
     pooled = layers.Activation('linear', name=f'{name}/head/out')(pooled)
 

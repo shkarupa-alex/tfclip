@@ -9,7 +9,6 @@ from tfclip.transform import PreprocessCfg, merge_preprocess_dict, image_transfo
 from tfclip.model import CLIP
 from tfclip.pretrain import get_pretrained_cfg, list_pretrained_tags_by_model, get_pretrained_url
 
-HF_HUB_PREFIX = 'hf-hub:'
 _MODEL_CONFIG_PATHS = [Path(__file__).parent / f'configs/']
 _MODEL_CONFIGS = {}
 
@@ -33,9 +32,7 @@ def _rescan_model_configs():
     for cf in config_files:
         with open(cf, 'r') as f:
             model_cfg = json.load(f)
-            disabled = model_cfg.pop('disabled', False)
-
-            if not disabled and all(a in model_cfg for a in ('embed_dim', 'vision_cfg', 'text_cfg')):
+            if all(a in model_cfg for a in ('embed_dim', 'vision_cfg', 'text_cfg')):
                 _MODEL_CONFIGS[cf.stem] = model_cfg
 
     _MODEL_CONFIGS = {k: v for k, v in sorted(_MODEL_CONFIGS.items(), key=lambda x: _natural_key(x[0]))}
@@ -45,10 +42,14 @@ _rescan_model_configs()  # initial populate of model config registry
 
 
 def list_models():
+    global _MODEL_CONFIGS
+
     return list(_MODEL_CONFIGS.keys())
 
 
 def get_model_config(model_name):
+    global _MODEL_CONFIGS
+
     if model_name in _MODEL_CONFIGS:
         return deepcopy(_MODEL_CONFIGS[model_name])
     else:
@@ -56,12 +57,9 @@ def get_model_config(model_name):
 
 
 def get_tokenizer(model_name='', context_length=None, **kwargs):
-    if model_name.startswith(HF_HUB_PREFIX):
-        raise ValueError(f'Unsupported text tokenizer: {model_name}')
-    else:
-        config = get_model_config(model_name)
-        if config is None:
-            raise ValueError(f'No valid model config found for {model_name}')
+    config = get_model_config(model_name)
+    if config is None:
+        raise ValueError(f'No valid model config found for {model_name}')
 
     text_config = config.get('text_cfg', {})
     tokenizer_kwargs = dict(text_config.get('tokenizer_kwargs', {}), **kwargs)
@@ -70,9 +68,7 @@ def get_tokenizer(model_name='', context_length=None, **kwargs):
         context_length = text_config.get('context_length', DEFAULT_CONTEXT_LENGTH)
     tokenizer_kwargs['context_length'] = context_length
 
-    if 'hf_tokenizer_name' in text_config:
-        raise ValueError(f'Unsupported text tokenizer: {text_config["hf_tokenizer_name"]}')
-    elif 'sp_tokenizer_name' in text_config:
+    if 'sp_tokenizer_name' in text_config:
         tokenizer = SentencePieceTokenizer(text_config['sp_tokenizer_name'], **tokenizer_kwargs)
     elif 'hub_tokenizer_name' in text_config:
         tokenizer = TensorflowHubTokenizer(text_config['hub_tokenizer_name'], **tokenizer_kwargs)
@@ -82,21 +78,12 @@ def get_tokenizer(model_name='', context_length=None, **kwargs):
     return tokenizer
 
 
-def create_model(model_name, pretrained=None, weights_path=None, **model_kwargs):
-    if model_name.startswith(HF_HUB_PREFIX):
-        raise ValueError(f'Unsupported model: {model_name}')
-
+def create_model_and_transforms(model_name, pretrained=None, weights_path=None, **model_kwargs):
     model_name = model_name.replace('/', '-')
 
     model_cfg = get_model_config(model_name)
     if model_cfg is None:
         raise ValueError(f'Model config for {model_name} not found')
-
-    if 'timm_model_name' in model_cfg.get('vision_cfg', {}):
-        raise ValueError(f'Unsupported image encoder: {model_cfg["vision_cfg"]["timm_model_name"]}')
-
-    if 'hf_model_name' in model_cfg.get('text_cfg', {}):
-        raise ValueError(f'Unsupported text encoder: {model_cfg["text_cfg"]["hf_model_name"]}')
 
     allowed_weights = list_pretrained_tags_by_model(model_name)
     if pretrained is not None and pretrained not in allowed_weights:
@@ -132,19 +119,8 @@ def create_model(model_name, pretrained=None, weights_path=None, **model_kwargs)
             weights_path = data_utils.get_file(origin=weights_url, file_hash=weights_hash, cache_subdir='tfclip')
         model.load_weights(weights_path)
 
-    return model
-
-
-def create_model_and_transforms(model_name, pretrained=None, weights_path=None, **model_kwargs):
-    model = create_model(model_name, pretrained=pretrained, weights_path=weights_path, **model_kwargs)
-
-    pretrained_cfg = {} if pretrained is None else get_pretrained_cfg(model_name, pretrained)
-    pretrained_cfg.pop('version', None)
-    pretrained_cfg.pop('sha256', None)
-
-    preprocess_cfg = PreprocessCfg(**pretrained_cfg)
-    image_prep = image_transform(preprocess_cfg.size, preprocess_cfg.interpolation, preprocess_cfg.resize_mode)
-
+    image_prep = image_transform(
+        model_cfg['vision_cfg']['image_size'], preprocess_cfg['interpolation'], preprocess_cfg['resize_mode'])
     text_prep = get_tokenizer(model_name)
 
     return model, image_prep, text_prep

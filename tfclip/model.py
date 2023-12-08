@@ -32,20 +32,18 @@ class CLIPVisionCfg:
     act_kwargs: Optional[dict] = None
     norm_kwargs: Optional[dict] = None
 
-    timm_model_name: Optional[str] = None
-    timm_model_pretrained: bool = False
-    timm_pool: str = 'avg'
-    timm_proj: str = 'linear'
-    timm_proj_bias: bool = False
-    timm_drop: float = 0.
-    timm_drop_path: Optional[float] = None
+    # TensorFlow specific vision tower config
+    attn_norm: Optional[bool] = None
+    rpe_pretrain: Optional[int] = None
+    post_norm: bool = False
+    swi_glu: bool = False
+    proj_bias: bool = False
 
 
 @dataclass
 class CLIPTextCfg:
     context_length: int = 77
     vocab_size: int = 49408
-    hf_tokenizer_name: Optional[str] = None
     tokenizer_kwargs: Optional[dict] = None
 
     width: int = 512
@@ -63,12 +61,6 @@ class CLIPTextCfg:
     act_kwargs: dict = None
     norm_kwargs: dict = None
 
-    # HuggingFace specific text tower config
-    hf_model_name: Optional[str] = None
-    hf_model_pretrained: bool = True
-    hf_proj_type: str = 'mlp'
-    hf_pooler_type: str = 'mean_pooler'  # attentional pooling for HF models
-
     # TensorFlow specific text tower config
     sp_tokenizer_name: Optional[str] = None
     hub_tokenizer_name: Optional[str] = None
@@ -78,12 +70,7 @@ def _build_vision_tower(embed_dim, vision_cfg, quick_gelu, img_mean, img_std):
     if isinstance(vision_cfg, dict):
         vision_cfg = CLIPVisionCfg(**vision_cfg)
 
-    if vision_cfg.timm_model_name:
-        raise ValueError(f'Unsupported image encoder: {vision_cfg.timm_model_name}')
-    elif isinstance(vision_cfg.layers, (tuple, list)):
-        raise ValueError(f'Unsupported image encoder: modified_resnet')
-    else:
-        model = VisionTransformer(embed_dim, vision_cfg, quick_gelu, img_mean, img_std)
+    model = VisionTransformer(embed_dim, vision_cfg, quick_gelu, img_mean, img_std)
 
     return model
 
@@ -92,10 +79,7 @@ def _build_text_tower(embed_dim, text_cfg, quick_gelu, custom=False):
     if isinstance(text_cfg, dict):
         text_cfg = CLIPTextCfg(**text_cfg)
 
-    if text_cfg.hf_model_name:
-        raise ValueError(f'Unsupported text encoder: {text_cfg.hf_model_name}')
-    else:
-        model = TextTransformer(embed_dim, text_cfg, quick_gelu, custom=custom)
+    model = TextTransformer(embed_dim, text_cfg, quick_gelu, custom=custom)
 
     return model
 
@@ -103,7 +87,6 @@ def _build_text_tower(embed_dim, text_cfg, quick_gelu, custom=False):
 def CLIP(
         embed_dim, vision_cfg, text_cfg, img_mean, img_std, quick_gelu=False, scale_init=-np.log(0.07),
         bias_init=None, custom_text=False):
-
     vision = _build_vision_tower(embed_dim, vision_cfg, quick_gelu, img_mean, img_std)
     text = _build_text_tower(embed_dim, text_cfg, quick_gelu, custom=custom_text)
 

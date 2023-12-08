@@ -7,25 +7,10 @@ from tfclip.utils import to_2tuple
 
 @dataclass
 class PreprocessCfg:
-    size: Union[int, Tuple[int, int]] = 224
-    mode: str = 'RGB'
     mean: Tuple[float, ...] = OPENAI_DATASET_MEAN
     std: Tuple[float, ...] = OPENAI_DATASET_STD
     interpolation: str = 'bicubic'
     resize_mode: str = 'shortest'
-    fill_color: int = 0
-
-    def __post_init__(self):
-        if 'RGB' != self.mode:
-            raise ValueError(f'Unsupported image mode: {self.mode}')
-
-    @property
-    def num_channels(self):
-        return 3
-
-    @property
-    def input_size(self):
-        return (self.num_channels,) + to_2tuple(self.size)
 
 
 _PREPROCESS_KEYS = set(asdict(PreprocessCfg()).keys())
@@ -49,8 +34,8 @@ def image_transform(image_size, interpolation_mode, resize_mode, name=None):
     def apply(image):
         with tf.name_scope(name or 'image_transform'):
             image = tf.convert_to_tensor(image)
-            if 3 != image.shape.rank or 3 != image.shape[-1]:
-                raise ValueError(f'Expecting a single RGB image, got shape: {image.shape}')
+            if image.shape.rank not in {3, 4} or 3 != image.shape[-1]:
+                raise ValueError(f'Expecting a single or batched RGB image, got shape: {image.shape}')
 
             if 'bicubic' == interpolation_mode:
                 interpolation = tf.image.ResizeMethod.BICUBIC
@@ -62,7 +47,9 @@ def image_transform(image_size, interpolation_mode, resize_mode, name=None):
             if 'squash' == resize_mode:
                 image = tf.image.resize(image, image_size, method=interpolation)
             elif 'shortest' == resize_mode:
-                source_size = tf.cast(tf.shape(image)[:2], 'float32')
+                source_size = tf.shape(image)
+                source_size = source_size[:2] if 3 == image.shape.rank else source_size[1:3]
+                source_size = tf.cast(source_size, 'float32')
 
                 aspect_ratio = source_size / tf.cast(image_size, 'float32')
                 aspect_ratio = tf.reduce_min(aspect_ratio)

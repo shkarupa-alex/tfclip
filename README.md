@@ -14,8 +14,8 @@ pip install tfclip
 
 ## Differences
 
-1. Function `create_model_and_transforms` returns `model, single_image_preprocess, batch_text_preprocess` instead of
-   `model, image_preprocess_train, image_preprocess_val` (OpenCLIP).
+1. Function `create_model_and_transforms` returns `model, single_or_batch_image_preprocess, batch_text_preprocess`
+   instead of `model, image_preprocess_train, image_preprocess_val` (OpenCLIP).
 2. Image preprocessing uses TensorFlow API instead of `PIL` (OpenCLIP). If you want compare ported model outputs
    against original, use pre-resized image.
 3. Some weights are too large and can't be uploaded in GitHub release. If you get 404 when trying
@@ -83,6 +83,9 @@ print('Label probs:', text_probs)  # [[2.3066459e-06 3.2963297e-07 1.9622959e-08
 > Fully ported
 > - coca_ViT-B-32: laion2b_s13b_b90k, mscoco_finetuned_laion2b_s13b_b90k
 > - coca_ViT-L-14: laion2b_s13b_b90k, mscoco_finetuned_laion2b_s13b_b90k
+> - EVA02-B-16: merged2b_s8b_b131k
+> - EVA02-L-14: merged2b_s4b_b131k
+> - EVA02-L-14-336: merged2b_s6b_b61k
 > - ViT-B-16: laion400m_e31, laion400m_e32, laion2b_s34b_b88k, datacomp_xl_s13b_b90k, datacomp_l_s1b_b8k,
     commonpool_l_clip_s1b_b8k, commonpool_l_laion_s1b_b8k, commonpool_l_image_s1b_b8k, commonpool_l_text_s1b_b8k,
     commonpool_l_basic_s1b_b8k, commonpool_l_s1b_b8k
@@ -109,6 +112,10 @@ print('Label probs:', text_probs)  # [[2.3066459e-06 3.2963297e-07 1.9622959e-08
 
 > [!WARNING]
 > Local weight conversion required
+> - EVA01-g-14: laion400m_s11b_b41k
+> - EVA01-g-14-plus: merged2b_s11b_b114k
+> - EVA02-E-14: laion2b_s4b_b115k
+> - EVA02-E-14-plus: laion2b_s9b_b144k
 > - ViT-bigG-14: laion2b_s39b_b160k
 > - ViT-bigG-14-CLIPA: datacomp1b
 > - ViT-bigG-14-CLIPA-336: datacomp1b
@@ -130,13 +137,6 @@ print('Label probs:', text_probs)  # [[2.3066459e-06 3.2963297e-07 1.9622959e-08
 > - convnext_large_d: laion2b_s26b_b102k_augreg
 > - convnext_large_d_320: laion2b_s29b_b131k_ft, laion2b_s29b_b131k_ft_soup
 > - convnext_xxlarge: laion2b_s34b_b82k_augreg, laion2b_s34b_b82k_augreg_rewind, laion2b_s34b_b82k_augreg_soup
-> - EVA01-g-14: laion400m_s11b_b41k
-> - EVA01-g-14-plus: merged2b_s11b_b114k
-> - EVA02-B-16: merged2b_s8b_b131k
-> - EVA02-E-14: laion2b_s4b_b115k
-> - EVA02-E-14-plus: laion2b_s9b_b144k
-> - EVA02-L-14: merged2b_s4b_b131k
-> - EVA02-L-14-336: merged2b_s6b_b61k
 > - nllb-clip-base: v1
 > - nllb-clip-large: v1
 > - RN50: openai, yfcc15m, cc12m
@@ -254,6 +254,15 @@ print('Label probs:', text_probs)  # [[2.3066459e-06 3.2963297e-07 1.9622959e-08
       author={Xianhang Li and Zeyu Wang and Cihang Xie},
       journal={arXiv preprint arXiv:2306.15658},
       year={2023},
+}
+```
+
+```
+@article{EVA-CLIP,
+  title={EVA-CLIP: Improved Training Techniques for CLIP at Scale},
+  author={Sun, Quan and Fang, Yuxin and Wu, Ledell and Wang, Xinlong and Cao, Yue},
+  journal={arXiv preprint arXiv:2303.15389},
+  year={2023}
 }
 ```
 

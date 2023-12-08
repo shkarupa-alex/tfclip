@@ -1,1 +1,3 @@
 include LICENSE requirements.txt
+include tfclip/bpe_simple_vocab_16e6.txt.gz
+include tfclip/configs/*.json

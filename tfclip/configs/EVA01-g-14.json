@@ -1,12 +1,19 @@
 {
-    "disabled": true,
     "embed_dim": 1024,
     "vision_cfg": {
         "image_size": 224,
-        "timm_model_name": "eva_giant_patch14_224",
-        "timm_model_pretrained": false,
-        "timm_pool": "token",
-        "timm_proj": null
+        "layers": 40,
+        "width": 1408,
+        "head_width": 88,
+        "patch_size": 14,
+        "patch_bias": true,
+        "mlp_ratio": 4.3637,
+        "no_ln_pre": true,
+        "pool_type": "tok",
+        "proj_bias": true,
+        "norm_kwargs":{
+            "eps": 1e-6
+        }
     },
     "text_cfg": {
         "context_length": 77,

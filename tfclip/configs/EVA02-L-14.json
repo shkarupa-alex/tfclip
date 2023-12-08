@@ -1,12 +1,21 @@
 {
-    "disabled": true,
     "embed_dim": 768,
     "vision_cfg": {
         "image_size": 224,
-        "timm_model_name": "eva02_large_patch14_clip_224",
-        "timm_model_pretrained": false,
-        "timm_pool": "token",
-        "timm_proj": null
+        "layers": 24,
+        "width": 1024,
+        "patch_size": 14,
+        "patch_bias": true,
+        "attn_norm": true,
+        "rpe_pretrain": 16,
+        "mlp_ratio": 2.6667,
+        "swi_glu": true,
+        "no_ln_pre": true,
+        "pool_type": "tok",
+        "proj_bias": true,
+        "norm_kwargs":{
+            "eps": 1e-6
+        }
     },
     "text_cfg": {
         "context_length": 77,
