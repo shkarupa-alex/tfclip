@@ -35,12 +35,12 @@ def transform_weights(weights, embeds, heads):
             value = value.transpose(2, 3, 1, 0)
 
         if '/pos/embedding:0' in key or '/attnpool/query:0' in key:
-            value = value if 3 == len(value.shape) else value[None]
+            value = value.reshape([d for d in value.shape if d > 1])[None]
 
         if '/cls/token:0' in key or '/scale/' in key:
-            value = value[None, None]
+            value = value.reshape([d for d in value.shape if d > 1])[None, None]
 
-        if any([part in key for part in {'/qkv/', '/attention_output/', '/expand/', '/squeeze/', '/proj/'}]):
+        if any([part in key for part in {'/qkv/', '/attention_output/', '/expand/', '/squeeze/', '/gate/', '/proj/'}]):
             value = value.T
 
         if 'vision/head/proj/kernel' in key and 'vision/head/proj/bias:0' not in weights:
@@ -57,6 +57,12 @@ def transform_weights(weights, embeds, heads):
 
         if any([f'/mapool/mhsa/{part}/' in key for part in {'query', 'key', 'value'}]):
             value = value.T.reshape(-1, head, head_dim)
+
+        if any([f'/attn/mhsa/{part}/' in key for part in {'query', 'key', 'value'}]):
+            if '/bias' in key:
+                value = value.T.reshape(head, head_dim)
+            else:
+                value = value.T.reshape(-1, head, head_dim)
 
         if '/qkv/bias:0' in key:
             value = value.reshape(3, head, head_dim)
@@ -75,6 +81,14 @@ def transform_weights(weights, embeds, heads):
             continue
 
         weights[key] = value
+
+    for key in list(weights.keys()):
+        if 'attn/mhsa/query/bias' not in key:
+            continue
+
+        key_ = key.replace('/query/bias', '/key/bias')
+        if key_ not in weights:
+            weights[key_] = np.zeros_like(weights[key])
 
     return weights
 
@@ -102,8 +116,14 @@ def convert_name(n):
     n = n.replace('/ln_pre.', '/patch/norm/').replace('/ln_final.', '/head/norm/').replace('/ln_post.', '/head/norm/')
     n = n.replace('.attn.in_proj_', '/attn/mhsa/qkv/').replace('.attn.out_proj.', '/attn/mhsa/attention_output/')
     n = n.replace('.attn.qkv.', '/attn/mhsa/qkv/').replace('.attn.proj.', '/attn/mhsa/attention_output/')
+    n = n.replace('.attn.q_proj.', '/attn/mhsa/query/').replace('.attn.k_proj.', '/attn/mhsa/key/')
+    n = n.replace('.attn.v_proj.', '/attn/mhsa/value/').replace('.attn.norm.weight', '/attn/mhsa/attention_norm/gamma')
+    n = n.replace('.attn.norm.bias', '/attn/mhsa/attention_norm/beta')
+    n = n.replace('.attn.q_bias', '/attn/mhsa/query/bias').replace('.attn.v_bias', '/attn/mhsa/value/bias')
     n = n.replace('.mlp.c_fc.', '/mlp/expand/').replace('.mlp.c_proj.', '/mlp/squeeze/')
     n = n.replace('.mlp.fc1.', '/mlp/expand/').replace('.mlp.fc2.', '/mlp/squeeze/')
+    n = n.replace('.mlp.fc1_x.', '/mlp/expand/').replace('.mlp.fc1_g.', '/mlp/gate/')
+    n = n.replace('.mlp.norm.weight', '/mlp/normalize/gamma').replace('.mlp.norm.bias', '/mlp/normalize/beta')
 
     n = n.replace('text/cls_emb', 'text/token/cls/token')
     n = n.replace('text/token_embedding.weight', 'text/token/embed/embeddings')
@@ -114,8 +134,10 @@ def convert_name(n):
 
     n = n.replace('vision/conv1.weight', 'vision/patch/embed/kernel')
     n = n.replace('vision/class_embedding', 'vision/patch/cls/token')
+    n = n.replace('vision/trunk.cls_token', 'vision/patch/cls/token')
     n = n.replace('vision/positional_embedding', 'vision/patch/pos/embedding')
     n = n.replace('vision/proj', 'vision/head/proj/kernel')
+    n = n.replace('vision/trunk.head.', 'vision/head/proj/')
 
     n = n.replace('vision/trunk.patch_embed.proj.', 'vision/patch/embed/')
     n = n.replace('vision/trunk.pos_embed', 'vision/patch/pos/embedding')
@@ -165,7 +187,7 @@ if '__main__' == __name__:
             f'Required combination of model and weights is not available. '
             f'Available weights for {argv.model_name} are: {allowed_weights}')
 
-    model_tf = tfclip.create_model(argv.model_name, pretrained=None)
+    model_tf, _, _ = tfclip.create_model_and_transforms(argv.model_name, pretrained=None)
     text_embed, text_heads = model_tf.get_layer(name='text/layer_0/attn/mhsa')._query_dense.kernel.shape[:2]
     vision_embed, vision_heads = model_tf.get_layer(name='vision/layer_0/attn/mhsa')._query_dense.kernel.shape[:2]
 

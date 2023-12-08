@@ -41,40 +41,6 @@ def _apcfg(version='1.0.0', sha256=None, **kwargs):
     }
 
 
-# _RN50 = dict(
-#     openai=_pcfg(),
-#     yfcc15m=_pcfg(),
-#     cc12m=_pcfg(),
-# )
-#
-# _RN50_quickgelu = dict(
-#     openai=_pcfg(),
-#     yfcc15m=_pcfg(),
-#     cc12m=_pcfg(),
-# )
-#
-# _RN101 = dict(
-#     openai=_pcfg(),
-#     yfcc15m=_pcfg(),
-# )
-#
-# _RN101_quickgelu = dict(
-#     openai=_pcfg(),
-#     yfcc15m=_pcfg(),
-# )
-#
-# _RN50x4 = dict(
-#     openai=_pcfg(),
-# )
-#
-# _RN50x16 = dict(
-#     openai=_pcfg(),
-# )
-#
-# _RN50x64 = dict(
-#     openai=_pcfg(),
-# )
-
 _VITB32 = dict(
     # openai=_pcfg(),  # OpenAI models were trained with QuickGELU
     laion400m_e31=_pcfg(sha256='320662fda288042c60a3b6175fb4c31f7b71803d9ce6d6ceb1fd69f5c9340b76'),
@@ -185,48 +151,6 @@ _VITbigG14 = dict(
     laion2b_s39b_b160k=_pcfg(),
 )
 
-# _robertaViTB32 = dict(
-#     laion2b_s12b_b32k=_pcfg(),
-# )
-#
-# _xlmRobertaBaseViTB32 = dict(
-#     laion5b_s13b_b90k=_pcfg(),
-# )
-#
-# _xlmRobertaLargeFrozenViTH14 = dict(
-#     frozen_laion5b_s13b_b90k=_pcfg(),
-# )
-#
-# _convnext_base = dict(
-#     laion400m_s13b_b51k=_pcfg(),
-# )
-#
-# _convnext_base_w = dict(
-#     laion2b_s13b_b82k=_pcfg(),
-#     laion2b_s13b_b82k_augreg=_pcfg(),
-#     laion_aesthetic_s13b_b82k=_pcfg(),
-# )
-#
-# _convnext_base_w_320 = dict(
-#     laion_aesthetic_s13b_b82k=_pcfg(),
-#     laion_aesthetic_s13b_b82k_augreg=_pcfg(),
-# )
-#
-# _convnext_large_d = dict(
-#     laion2b_s26b_b102k_augreg=_pcfg(),
-# )
-#
-# _convnext_large_d_320 = dict(
-#     laion2b_s29b_b131k_ft=_pcfg(),
-#     laion2b_s29b_b131k_ft_soup=_pcfg(),
-# )
-#
-# _convnext_xxlarge = dict(
-#     laion2b_s34b_b82k_augreg=_pcfg(),
-#     laion2b_s34b_b82k_augreg_rewind=_pcfg(),
-#     laion2b_s34b_b82k_augreg_soup=_pcfg(),
-# )
-
 _coca_VITB32 = dict(
     laion2b_s13b_b90k=_pcfg(sha256='ff9b00049daad95ffc724ae8b57f5760ea99e6f41b7e4ad8b69198198dd6f767'),
     mscoco_finetuned_laion2b_s13b_b90k=_pcfg(sha256='e8d09d9feb7b6945ad241655639729bf72f54efeda1f153b05b71b508be435fa')
@@ -238,14 +162,6 @@ _coca_VITL14 = dict(
 )
 
 _PRETRAINED = {
-    # 'RN50': _RN50,
-    # 'RN50-quickgelu': _RN50_quickgelu,
-    # 'RN101': _RN101,
-    # 'RN101-quickgelu': _RN101_quickgelu,
-    # 'RN50x4': _RN50x4,
-    # 'RN50x16': _RN50x16,
-    # 'RN50x64': _RN50x64,
-
     'ViT-B-32': _VITB32,
     'ViT-B-32-256': _VITB32_256,
     'ViT-B-32-quickgelu': _VITB32_quickgelu,
@@ -260,48 +176,37 @@ _PRETRAINED = {
     'ViT-g-14': _VITg14,
     'ViT-bigG-14': _VITbigG14,
 
-    # 'roberta-ViT-B-32': _robertaViTB32,
-    # 'xlm-roberta-base-ViT-B-32': _xlmRobertaBaseViTB32,
-    # 'xlm-roberta-large-ViT-H-14': _xlmRobertaLargeFrozenViTH14,
-
-    # 'convnext_base': _convnext_base,
-    # 'convnext_base_w': _convnext_base_w,
-    # 'convnext_base_w_320': _convnext_base_w_320,
-    # 'convnext_large_d': _convnext_large_d,
-    # 'convnext_large_d_320': _convnext_large_d_320,
-    # 'convnext_xxlarge': _convnext_xxlarge,
-
     'coca_ViT-B-32': _coca_VITB32,
     'coca_ViT-L-14': _coca_VITL14,
 
-    # 'EVA01-g-14': dict(
-    #     # from QuanSun/EVA-CLIP/EVA01_CLIP_g_14_psz14_s11B.pt
-    #     laion400m_s11b_b41k=_pcfg(),
-    # ),
-    # 'EVA01-g-14-plus': dict(
-    #     # from QuanSun/EVA-CLIP/EVA01_CLIP_g_14_plus_psz14_s11B.pt
-    #     merged2b_s11b_b114k=_pcfg(),
-    # ),
-    # 'EVA02-B-16': dict(
-    #     # from QuanSun/EVA-CLIP/EVA02_CLIP_B_psz16_s8B.pt
-    #     merged2b_s8b_b131k=_pcfg(),
-    # ),
-    # 'EVA02-L-14': dict(
-    #     # from QuanSun/EVA-CLIP/EVA02_CLIP_L_psz14_s4B.pt
-    #     merged2b_s4b_b131k=_pcfg(),
-    # ),
-    # 'EVA02-L-14-336': dict(
-    #     # from QuanSun/EVA-CLIP/EVA02_CLIP_L_336_psz14_s6B.pt
-    #     merged2b_s6b_b61k=_pcfg(),
-    # ),
-    # 'EVA02-E-14': dict(
-    #     # from QuanSun/EVA-CLIP/EVA02_CLIP_E_psz14_s4B.pt
-    #     laion2b_s4b_b115k=_pcfg(),
-    # ),
-    # 'EVA02-E-14-plus': dict(
-    #     # from QuanSun/EVA-CLIP/EVA02_CLIP_E_psz14_plus_s9B.pt
-    #     laion2b_s9b_b144k=_pcfg(),
-    # ),
+    'EVA01-g-14': dict(
+        # from QuanSun/EVA-CLIP/EVA01_CLIP_g_14_psz14_s11B.pt
+        laion400m_s11b_b41k=_pcfg(),
+    ),
+    'EVA01-g-14-plus': dict(
+        # from QuanSun/EVA-CLIP/EVA01_CLIP_g_14_plus_psz14_s11B.pt
+        merged2b_s11b_b114k=_pcfg(),
+    ),
+    'EVA02-B-16': dict(
+        # from QuanSun/EVA-CLIP/EVA02_CLIP_B_psz16_s8B.pt
+        merged2b_s8b_b131k=_pcfg(sha256='d4436d70259eb6c0628567179a0adb86955d82a3378003e6baf43655d884ba21'),
+    ),
+    'EVA02-L-14': dict(
+        # from QuanSun/EVA-CLIP/EVA02_CLIP_L_psz14_s4B.pt
+        merged2b_s4b_b131k=_pcfg(sha256='b2deef65d02f4617bac637bf2a313663be29c5e651f03efb7f5d84a804d3d54c'),
+    ),
+    'EVA02-L-14-336': dict(
+        # from QuanSun/EVA-CLIP/EVA02_CLIP_L_336_psz14_s6B.pt
+        merged2b_s6b_b61k=_pcfg(sha256='3c3826c2ac3e9b3fbcba9e7ad4596646aba4ab5c0d0fe9556d482d1a27c289e6'),
+    ),
+    'EVA02-E-14': dict(
+        # from QuanSun/EVA-CLIP/EVA02_CLIP_E_psz14_s4B.pt
+        laion2b_s4b_b115k=_pcfg(),
+    ),
+    'EVA02-E-14-plus': dict(
+        # from QuanSun/EVA-CLIP/EVA02_CLIP_E_psz14_plus_s9B.pt
+        laion2b_s9b_b144k=_pcfg(),
+    ),
 
     'ViT-B-16-SigLIP': dict(
         webli=_slpcfg(sha256='cb71518557f6e047e24d92aeb72e78b519b151dadaed5123d28cb71940cf4c66'),
@@ -350,13 +255,6 @@ _PRETRAINED = {
     'ViT-bigG-14-CLIPA-336': dict(
         datacomp1b=_apcfg(),
     ),
-
-    # 'nllb-clip-base': dict(
-    #     v1=_pcfg(),
-    # ),
-    # 'nllb-clip-large': dict(
-    #     v1=_pcfg(),
-    # )
 }
 
 
