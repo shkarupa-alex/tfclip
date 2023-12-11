@@ -3,7 +3,7 @@
     "init_logit_bias": -10,
     "custom_text": true,
     "vision_cfg": {
-        "image_size": 384,
+        "image_size": 378,
         "layers": 27,
         "width": 1152,
         "head_width": 72,
