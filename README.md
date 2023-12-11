@@ -23,6 +23,7 @@ pip install tfclip
    `python convert_weights.py <model_name> <pretrain_name> <weights_dir>` and supply weight path like this
    `create_model_and_transforms(..., weights_path='<path_to_weights.h5>')`
 4. OpenAI weights moved to `-quickgelu` models where they should be.
+5. Model `ViT-SO400M-14-SigLIP-384` renamed to `ViT-SO400M-14-SigLIP-378` (384 // 14 * 14 == 378).
 
 ## Examples
 
@@ -127,7 +128,7 @@ print('Label probs:', text_probs)  # [[2.3066459e-06 3.2963297e-07 1.9622959e-08
 > - ViT-L-16-SigLIP-256: webli
 > - ViT-L-16-SigLIP-384: webli
 > - ViT-SO400M-14-SigLIP: webli
-> - ViT-SO400M-14-SigLIP-384: webli
+> - ViT-SO400M-14-SigLIP-378: webli
 
 > [!CAUTION]
 > Not ported
