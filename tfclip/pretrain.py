@@ -226,7 +226,7 @@ _PRETRAINED = {
     'ViT-L-16-SigLIP-256': dict(
         webli=_slpcfg(),
     ),
-    'ViT-L-16-SigLIP-384': dict(
+    'ViT-L-16-SigLIP-378': dict(
         webli=_slpcfg(),
     ),
     'ViT-SO400M-14-SigLIP': dict(

@@ -203,6 +203,7 @@ if '__main__' == __name__:
 
     # OpenAI models were trained with QuickGELU, but pretrains placed in wrong models (without `-quickgelu`)
     oc_name = argv.model_name.replace('-quickgelu', '') if 'openai' == argv.model_pretrain else argv.model_name
+    oc_name = 'ViT-SO400M-14-SigLIP-384' if 'ViT-SO400M-14-SigLIP-378' == oc_name else oc_name
     model_torch = open_clip.create_model(oc_name, pretrained=argv.model_pretrain)
     weights_torch = model_torch.state_dict()
     weights_torch = {convert_name(k): v.numpy() for k, v in weights_torch.items()}
