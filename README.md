@@ -284,3 +284,12 @@ print('Label probs:', text_probs)  # [[2.3066459e-06 3.2963297e-07 1.9622959e-08
   year={2023}
 }
 ```
+
+```
+@article{fang2023data,
+  title={Data Filtering Networks},
+  author={Fang, Alex and Jose, Albin Madappally and Jain, Amit and Schmidt, Ludwig and Toshev, Alexander and Shankar, Vaishaal},
+  journal={arXiv preprint arXiv:2309.17425},
+  year={2023}
+}
+```
