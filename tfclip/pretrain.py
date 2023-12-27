@@ -94,6 +94,8 @@ _VITB16 = dict(
     commonpool_l_text_s1b_b8k=_pcfg(sha256='bb91fe106f4eed27dc672ad12ba59b27f43cff0651a27bceeffd7230a4307cff'),
     commonpool_l_basic_s1b_b8k=_pcfg(sha256='7f6df7729ebacd07d8a27bd69b5c99755731328ee81f5f53d5475fb120c67396'),
     commonpool_l_s1b_b8k=_pcfg(sha256='73f2da6dc01575c3ddb17ed1b459b1ef07dc9fe5dc54e68d64bcdd1c8407559a'),
+    # DFN
+    dfn2b=_pcfg(sha256='3cbd3380bb36041dac08f1f4a8c38fbed03f934163872e76db43ca164aed0c0d')
 )
 
 _VITB16_quickgelu = dict(
@@ -127,6 +129,7 @@ _VITL14_quickgelu = dict(
     openai=_pcfg(sha256='cd11e3ebc37d88a89e9fb788fe32472791de23813666b1531ab971d3aae327c5'),
     metaclip_400m=_pcfg(sha256='d992eb4050ed92f50fc92889e8a3417d1a35d338676930931544617c81244ec5'),
     metaclip_fullcc=_pcfg(sha256='383266d4e77954cd8602a92fb095103ed4d0118b51bb17d739d12a336cc7c149'),
+    dfn2b=_pcfg(sha256='3506d4e53b02c5c8425a83e9def3c3bc85c33ad2b64f0c3670ed08842c26acd3'),
 )
 
 _VITL14_336_quickgelu = dict(
@@ -140,6 +143,11 @@ _VITH14 = dict(
 
 _VITH14_quickgelu = dict(
     metaclip_fullcc=_pcfg(),
+    dfn5b=_pcfg(resize_mode='squash'),
+)
+
+_VITH14_378_quickgelu = dict(
+    dfn5b=_pcfg(resize_mode='squash'),
 )
 
 _VITg14 = dict(
@@ -173,6 +181,7 @@ _PRETRAINED = {
     'ViT-L-14-336-quickgelu': _VITL14_336_quickgelu,  # OpenAI models were trained with QuickGELU
     'ViT-H-14': _VITH14,
     'ViT-H-14-quickgelu': _VITH14_quickgelu,
+    'ViT-H-14-378-quickgelu': _VITH14_378_quickgelu,
     'ViT-g-14': _VITg14,
     'ViT-bigG-14': _VITbigG14,
 
