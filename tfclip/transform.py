@@ -45,7 +45,7 @@ def image_transform(image_size, interpolation_mode, resize_mode, name=None):
                 raise ValueError(f'Unsupported interpolation mode: {interpolation_mode}')
 
             if 'squash' == resize_mode:
-                image = tf.image.resize(image, image_size, method=interpolation)
+                image = tf.image.resize(image, image_size, method=interpolation, antialias=True)
             elif 'shortest' == resize_mode:
                 source_size = tf.shape(image)
                 source_size = source_size[:2] if 3 == image.shape.rank else source_size[1:3]
