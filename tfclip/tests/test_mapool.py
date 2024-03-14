@@ -1,4 +1,4 @@
-from keras.src.testing_infra import test_combinations, test_utils
+from tf_keras.src.testing_infra import test_combinations, test_utils
 from tfclip.mapool import MultiheadAttentionPooling
 
 

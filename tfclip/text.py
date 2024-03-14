@@ -1,4 +1,4 @@
-from keras import layers, models
+from tf_keras import layers, models
 from tfclip.abspos import TextPositionEmbedding
 from tfclip.clstok import AddClassToken
 from tfclip.lscale import LayerScale

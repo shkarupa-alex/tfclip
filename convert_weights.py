@@ -4,7 +4,7 @@ import numpy as np
 import open_clip
 import os
 import tfclip
-from keras.src.utils import data_utils
+from tf_keras.src.utils import data_utils
 
 
 def transform_weights(weights, embeds, heads):

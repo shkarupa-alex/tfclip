@@ -1,5 +1,5 @@
 import tensorflow as tf
-from keras.src.testing_infra import test_combinations
+from tf_keras.src.testing_infra import test_combinations
 from tfclip.itsim import ImageTextSimilarity
 from testing_utils import layer_multi_io_test
 

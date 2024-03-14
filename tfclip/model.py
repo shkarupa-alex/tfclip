@@ -1,6 +1,6 @@
 import numpy as np
 from dataclasses import dataclass
-from keras import layers, models
+from tf_keras import layers, models
 from typing import Optional, Tuple, Union
 from tfclip.itsim import ImageTextSimilarity
 from tfclip.text import TextTransformer

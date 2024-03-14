@@ -1,8 +1,8 @@
 import numpy as np
 import tensorflow as tf
-from keras import initializers, layers
-from keras.saving import register_keras_serializable
-from keras.src.utils.tf_utils import shape_type_conversion
+from tf_keras import initializers, layers
+from tf_keras.saving import register_keras_serializable
+from tf_keras.src.utils.tf_utils import shape_type_conversion
 
 
 @register_keras_serializable(package='TFCLIP')

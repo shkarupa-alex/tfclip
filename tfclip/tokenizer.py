@@ -6,7 +6,7 @@ import re
 import string
 import tensorflow as tf
 import tensorflow_text as tf_text
-from keras.src.utils import data_utils
+from tf_keras.src.utils import data_utils
 from tensorflow_hub import KerasLayer
 
 DEFAULT_CONTEXT_LENGTH = 77  # Default context length for OpenAI CLIP
