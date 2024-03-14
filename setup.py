@@ -6,7 +6,7 @@ with open('README.md', 'r') as fh:
 
 setup(
     name='tfclip',
-    version='1.3.1',
+    version='1.4.0',
     description='Keras (TensorFlow v2) port of OpenCLIP package.',
     long_description=long_description,
     long_description_content_type="text/markdown",

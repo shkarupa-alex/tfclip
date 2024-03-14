@@ -2,7 +2,7 @@ import json
 import re
 from copy import deepcopy
 from dataclasses import asdict
-from keras.src.utils import data_utils
+from tf_keras.src.utils import data_utils
 from pathlib import Path
 from tfclip.tokenizer import DEFAULT_CONTEXT_LENGTH, SimpleTokenizer, SentencePieceTokenizer, TensorflowHubTokenizer
 from tfclip.transform import PreprocessCfg, merge_preprocess_dict, image_transform

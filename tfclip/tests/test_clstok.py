@@ -1,7 +1,7 @@
 import numpy as np
 import tensorflow as tf
-from keras import layers
-from keras.src.testing_infra import test_combinations, test_utils
+from tf_keras import layers
+from tf_keras.src.testing_infra import test_combinations, test_utils
 from tfclip.clstok import AddClassToken, SplitClassToken
 from testing_utils import layer_multi_io_test
 

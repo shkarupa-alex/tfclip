@@ -31,7 +31,7 @@ Default usage (with pretrained temperature scaling):
 
 ```python
 import cv2
-from keras.src.utils import data_utils
+from tf_keras.src.utils import data_utils
 from tfclip import create_model_and_transforms
 
 model, image_prep, text_prep = create_model_and_transforms('ViT-B-32', pretrained='laion2b_s34b_b79k')
@@ -52,8 +52,8 @@ Extract image and/or text features separately:
 ```python
 import cv2
 import tensorflow as tf
-from keras import models
-from keras.src.utils import data_utils
+from tf_keras import models
+from tf_keras.src.utils import data_utils
 from tfclip import create_model_and_transforms
 
 model, image_prep, text_prep = create_model_and_transforms('ViT-B-32', pretrained='laion2b_s34b_b79k')

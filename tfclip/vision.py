@@ -1,7 +1,7 @@
 import numpy as np
 import tensorflow as tf
-from keras import backend, layers, models
-from keras.src.applications import imagenet_utils
+from tf_keras import backend, layers, models
+from tf_keras.src.applications import imagenet_utils
 from tfclip.abspos import ImagePositionEmbedding
 from tfclip.attnpool import AttentionalPooler
 from tfclip.clstok import AddClassToken, SplitClassToken
