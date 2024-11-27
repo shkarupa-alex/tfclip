@@ -1,8 +1,9 @@
 # tfclip
 
-Keras (TensorFlow v2) port of **OpenCLIP** package.
+Keras v3 (TensorFlow v2) port of **OpenCLIP** package.
 
-+ Based on [Original Pytorch implementation](https://github.com/mlfoundations/open_clip).
++ Based
+  on [Original Pytorch implementation](https://github.com/mlfoundations/open_clip).
 + Contains a lof of models and pretrained weights.
 + Image preprocessing and text tokenization work in graph mode.
 
@@ -14,16 +15,21 @@ pip install tfclip
 
 ## Differences
 
-1. Function `create_model_and_transforms` returns `model, single_or_batch_image_preprocess, batch_text_preprocess`
+1. Function `create_model_and_transforms` returns
+   `model, single_or_batch_image_preprocess, batch_text_preprocess`
    instead of `model, image_preprocess_train, image_preprocess_val` (OpenCLIP).
-2. Image preprocessing uses TensorFlow API instead of `PIL` (OpenCLIP). If you want compare ported model outputs
+2. Image preprocessing uses TensorFlow API instead of `PIL` (OpenCLIP). If you
+   want compare ported model outputs
    against original, use pre-resized image.
-3. Some weights are too large and can't be uploaded in GitHub release. If you get 404 when trying
+3. Some weights are too large and can't be uploaded in GitHub release. If you
+   get 404 when trying
    to load model weights, you should convert them locally using script
-   `python convert_weights.py <model_name> <pretrain_name> <weights_dir>` and supply weight path like this
+   `python convert_weights.py <model_name> <pretrain_name> <weights_dir>` and
+   supply weight path like this
    `create_model_and_transforms(..., weights_path='<path_to_weights.h5>')`
 4. OpenAI weights moved to `-quickgelu` models where they should be.
-5. Model `ViT-SO400M-14-SigLIP-384` renamed to `ViT-SO400M-14-SigLIP-378` (384 // 14 * 14 == 378).
+5. Model `ViT-SO400M-14-SigLIP-384` renamed to `ViT-SO400M-14-SigLIP-378` (
+   384 // 14 * 14 == 378).
 
 ## Examples
 
@@ -31,19 +37,22 @@ Default usage (with pretrained temperature scaling):
 
 ```python
 import cv2
-from tf_keras.src.utils import data_utils
+from keras.src.utils import get_file
 from tfclip import create_model_and_transforms
 
-model, image_prep, text_prep = create_model_and_transforms('ViT-B-32', pretrained='laion2b_s34b_b79k')
+model, image_prep, text_prep = create_model_and_transforms('ViT-B-32',
+                                                           pretrained='laion2b_s34b_b79k')
 
-image = data_utils.get_file(
-    'elephant.jpg', 'https://storage.googleapis.com/tensorflow/keras-applications/tests/elephant.jpg')
+image = get_file(
+    'elephant.jpg',
+    'https://storage.googleapis.com/tensorflow/keras-applications/tests/elephant.jpg')
 image = cv2.cvtColor(cv2.imread(image), cv2.COLOR_BGR2RGB)
 images = image_prep(image)[None]
 texts = text_prep(['a diagram', 'a dog', 'a cat', 'an elephant'])
 
 text_probs = model([images, texts], training=False).numpy()
-print('Label probs:', text_probs)  # [[2.3066370e-06 3.2963203e-07 1.9622885e-08 9.9999738e-01]]
+print('Label probs:',
+      text_probs)  # [[2.3066370e-06 3.2963203e-07 1.9622885e-08 9.9999738e-01]]
 # open_clip: [[2.4752687e-06 3.3843190e-07 2.0362965e-08 9.9999714e-01]]
 ```
 
@@ -51,60 +60,71 @@ Extract image and/or text features separately:
 
 ```python
 import cv2
-import tensorflow as tf
-from tf_keras import models
-from tf_keras.src.utils import data_utils
+from keras import models, ops
+from keras.src.utils import get_file
 from tfclip import create_model_and_transforms
 
-model, image_prep, text_prep = create_model_and_transforms('ViT-B-32', pretrained='laion2b_s34b_b79k')
+model, image_prep, text_prep = create_model_and_transforms('ViT-B-32',
+                                                           pretrained='laion2b_s34b_b79k')
 
-image = data_utils.get_file(
-    'elephant.jpg', 'https://storage.googleapis.com/tensorflow/keras-applications/tests/elephant.jpg')
+image = get_file(
+    'elephant.jpg',
+    'https://storage.googleapis.com/tensorflow/keras-applications/tests/elephant.jpg')
 image = cv2.cvtColor(cv2.imread(image), cv2.COLOR_BGR2RGB)
 images = image_prep(image)[None]
 texts = text_prep(['a diagram', 'a dog', 'a cat', 'an elephant'])
 
-image_model = models.Model(model.inputs[0], model.get_layer('vision/head/out').output)
+image_model = models.Model(model.inputs[0],
+                           model.get_layer('vision/head/out').output)
 image_features = image_model(images, training=False)
-image_features /= tf.norm(image_features, axis=-1, keepdims=True)
+image_features /= ops.norm(image_features, axis=-1, keepdims=True)
 
-text_model = models.Model(model.inputs[1], model.get_layer('text/head/out').output)
+text_model = models.Model(model.inputs[1],
+                          model.get_layer('text/head/out').output)
 text_features = text_model(texts, training=False)
-text_features /= tf.norm(text_features, axis=-1, keepdims=True)
+text_features /= ops.norm(text_features, axis=-1, keepdims=True)
 
-text_probs = tf.matmul(image_features * 100., text_features, transpose_b=True)
-text_probs = tf.nn.softmax(text_probs).numpy()
-print('Label probs:', text_probs)  # [[2.3066459e-06 3.2963297e-07 1.9622959e-08 9.9999738e-01]]
+text_probs = ops.matmul(image_features * 100., text_features, transpose_b=True)
+text_probs = ops.softmax(text_probs).numpy()
+print('Label probs:',
+      text_probs)  # [[2.3066459e-06 3.2963297e-07 1.9622959e-08 9.9999738e-01]]
 # open_clip: [[2.4752687e-06 3.3843190e-07 2.0362965e-08 9.9999714e-01]]
 ```
 
 ## Models and weights
 
-> [!TIP]
+> [!NOTE]
 > Fully ported
 > - coca_ViT-B-32: laion2b_s13b_b90k, mscoco_finetuned_laion2b_s13b_b90k
 > - coca_ViT-L-14: laion2b_s13b_b90k, mscoco_finetuned_laion2b_s13b_b90k
 > - EVA02-B-16: merged2b_s8b_b131k
 > - EVA02-L-14: merged2b_s4b_b131k
 > - EVA02-L-14-336: merged2b_s6b_b61k
-> - ViT-B-16: laion400m_e31, laion400m_e32, laion2b_s34b_b88k, datacomp_xl_s13b_b90k, datacomp_l_s1b_b8k,
-    commonpool_l_clip_s1b_b8k, commonpool_l_laion_s1b_b8k, commonpool_l_image_s1b_b8k, commonpool_l_text_s1b_b8k,
+> - ViT-B-16: laion400m_e31, laion400m_e32, laion2b_s34b_b88k,
+    datacomp_xl_s13b_b90k, datacomp_l_s1b_b8k,
+    commonpool_l_clip_s1b_b8k, commonpool_l_laion_s1b_b8k,
+    commonpool_l_image_s1b_b8k, commonpool_l_text_s1b_b8k,
     commonpool_l_basic_s1b_b8k, commonpool_l_s1b_b8k
 > - ViT-B-16-plus-240: laion400m_e31, laion400m_e32
-> - ViT-B-16-quickgelu: openai, metaclip_400m, metaclip_fullcc
+> - ViT-B-16-quickgelu: dfn2b, openai, metaclip_400m, metaclip_fullcc
 > - ViT-B-16-SigLIP: webli
 > - ViT-B-16-SigLIP-256: webli
 > - ViT-B-16-SigLIP-384: webli
 > - ViT-B-16-SigLIP-512: webli
 > - ViT-B-16-SigLIP-i18n-256: webli
-> - ViT-B-32: laion400m_e31, laion400m_e32, laion2b_e16, laion2b_s34b_b79k, datacomp_xl_s13b_b90k, datacomp_m_s128m_b4k,
-    commonpool_m_clip_s128m_b4k, commonpool_m_laion_s128m_b4k, commonpool_m_image_s128m_b4k,
-    commonpool_m_text_s128m_b4k, commonpool_m_basic_s128m_b4k, commonpool_m_s128m_b4k, datacomp_s_s13m_b4k,
-    commonpool_s_clip_s13m_b4k, commonpool_s_laion_s13m_b4k, commonpool_s_image_s13m_b4k, commonpool_s_text_s13m_b4k,
+> - ViT-B-32: laion2b_e16, laion2b_s34b_b79k, datacomp_xl_s13b_b90k,
+    datacomp_m_s128m_b4k, commonpool_m_clip_s128m_b4k,
+    commonpool_m_laion_s128m_b4k, commonpool_m_image_s128m_b4k,
+    commonpool_m_text_s128m_b4k, commonpool_m_basic_s128m_b4k,
+    commonpool_m_s128m_b4k, datacomp_s_s13m_b4k,
+    commonpool_s_clip_s13m_b4k, commonpool_s_laion_s13m_b4k,
+    commonpool_s_image_s13m_b4k, commonpool_s_text_s13m_b4k,
     commonpool_s_basic_s13m_b4k, commonpool_s_s13m_b4k
 > - ViT-B-32-256: datacomp_s34b_b86k
-> - ViT-B-32-quickgelu: openai, laion400m_e31, laion400m_e32, metaclip_400m, metaclip_fullcc
-> - ViT-L-14: laion400m_e31, laion400m_e32, laion2b_s32b_b82k, datacomp_xl_s13b_b90k, commonpool_xl_clip_s13b_b90k,
+> - ViT-B-32-quickgelu: openai, laion400m_e31, laion400m_e32, metaclip_400m,
+    metaclip_fullcc
+> - ViT-L-14: laion400m_e31, laion400m_e32, laion2b_s32b_b82k,
+    datacomp_xl_s13b_b90k, commonpool_xl_clip_s13b_b90k,
     commonpool_xl_laion_s13b_b90k, commonpool_xl_s13b_b90k
 > - ViT-L-14-336-quickgelu: openai
 > - ViT-L-14-CLIPA: datacomp1b
@@ -112,7 +132,7 @@ print('Label probs:', text_probs)  # [[2.3066459e-06 3.2963297e-07 1.9622959e-08
 > - ViT-L-14-quickgelu: openai, metaclip_400m, metaclip_fullcc
 
 > [!WARNING]
-> Local weight conversion required
+> Local weight conversion required (use `convert_weights.py`)
 > - EVA01-g-14: laion400m_s11b_b41k
 > - EVA01-g-14-plus: merged2b_s11b_b114k
 > - EVA02-E-14: laion2b_s4b_b115k
@@ -120,34 +140,55 @@ print('Label probs:', text_probs)  # [[2.3066459e-06 3.2963297e-07 1.9622959e-08
 > - ViT-bigG-14: laion2b_s39b_b160k
 > - ViT-bigG-14-CLIPA: datacomp1b
 > - ViT-bigG-14-CLIPA-336: datacomp1b
+> - ViT-bigG-14-quickgelu: metaclip_fullcc
 > - ViT-g-14: laion2b_s12b_b42k, laion2b_s34b_b88k
 > - ViT-H-14: laion2b_s32b_b79k
 > - ViT-H-14-CLIPA: datacomp1b
-> - ViT-H-14-CLIPA-336-quickgelu: laion2b, datacomp1b
+> - ViT-H-14-CLIPA-336: laion2b, datacomp1b
 > - ViT-H-14-quickgelu: metaclip_fullcc
 > - ViT-L-16-SigLIP-256: webli
 > - ViT-L-16-SigLIP-384: webli
 > - ViT-SO400M-14-SigLIP: webli
 > - ViT-SO400M-14-SigLIP-378: webli
+> - ViT-SO400M-16-SigLIP-i18n-256: webli
 
 > [!CAUTION]
 > Not ported
 > - convnext_base: laion400m_s13b_b51k
-> - convnext_base_w: laion2b_s13b_b82k, laion2b_s13b_b82k_augreg, laion_aesthetic_s13b_b82k
-> - convnext_base_w_320: laion_aesthetic_s13b_b82k, laion_aesthetic_s13b_b82k_augreg
+> - convnext_base_w: laion2b_s13b_b82k, laion2b_s13b_b82k_augreg,
+    laion_aesthetic_s13b_b82k
+> - convnext_base_w_320: laion_aesthetic_s13b_b82k,
+    laion_aesthetic_s13b_b82k_augreg
 > - convnext_large_d: laion2b_s26b_b102k_augreg
 > - convnext_large_d_320: laion2b_s29b_b131k_ft, laion2b_s29b_b131k_ft_soup
-> - convnext_xxlarge: laion2b_s34b_b82k_augreg, laion2b_s34b_b82k_augreg_rewind, laion2b_s34b_b82k_augreg_soup
+> - convnext_xxlarge: laion2b_s34b_b82k_augreg, laion2b_s34b_b82k_augreg_rewind,
+    laion2b_s34b_b82k_augreg_soup
+> - MobileCLIP-B: datacompdr, datacompdr_lt
+> - MobileCLIP-S1: datacompdr
+> - MobileCLIP-S2: datacompdr
+> - nllb-clip-base-siglip: mrl, v1
 > - nllb-clip-base: v1
+> - nllb-clip-large-siglip: mrl, v1
 > - nllb-clip-large: v1
-> - RN50: openai, yfcc15m, cc12m
-> - RN50-quickgelu: openai, yfcc15m, cc12m
-> - RN50x4: openai
-> - RN50x16: openai
-> - RN50x64: openai
-> - RN101: openai, yfcc15m
+> - RN50x4-quickgelu: openai
+> - RN50x16-quickgelu: openai
+> - RN50x64-quickgelu: openai
+> - RN50-quickgelu: cc12m, openai, yfcc15m
 > - RN101-quickgelu: openai, yfcc15m
 > - roberta-ViT-B-32: laion2b_s12b_b32k
+> - ViTamin-B: datacomp1b
+> - ViTamin-B-LTT: datacomp1b
+> - ViTamin-L: datacomp1b
+> - ViTamin-L2: datacomp1b
+> - ViTamin-L2-256: datacomp1b
+> - ViTamin-L2-336: datacomp1b
+> - ViTamin-L-256: datacomp1b
+> - ViTamin-L-336: datacomp1b
+> - ViTamin-S: datacomp1b
+> - ViTamin-S-LTT: datacomp1b
+> - ViTamin-XL-256: datacomp1b
+> - ViTamin-XL-336: datacomp1b
+> - ViTamin-XL-384: datacomp1b
 > - xlm-roberta-base-ViT-B-32: laion5b_s13b_b90k
 > - xlm-roberta-large-ViT-H-14: frozen_laion5b_s13b_b90k
 

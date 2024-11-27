@@ -1,19 +1,25 @@
-import tensorflow as tf
-from tf_keras.src.testing_infra import test_combinations
+from keras.src import testing
+
 from tfclip.evattn import EvaMultiHeadAttention
 
 
-@test_combinations.run_all_keras_modes
-class TestEvaMultiHeadAttention(test_combinations.TestCase):
+class TestEvaMultiHeadAttention(testing.TestCase):
     def test_layer(self):
-        inputs = tf.random.uniform(shape=(2, 197, 768))
-        layer = EvaMultiHeadAttention(12, 64, norm_epsilon=1e-6, rpe_pretrain=16)
-
-        result = layer(inputs, inputs)
-        result = self.evaluate(result)
-
-        self.assertTupleEqual(result.shape[1:], (197, 768))
-
-
-if __name__ == '__main__':
-    tf.test.main()
+        self.run_layer_test(
+            EvaMultiHeadAttention,
+            init_kwargs={
+                "num_heads": 12,
+                "key_dim": 64,
+                "value_dim": 48,
+                "norm_epsilon": 1e-6,
+                "rpe_pretrain": 16,
+            },
+            input_shape={
+                "query_shape": (2, 64, 768),
+                "value_shape": (2, 64, 768),
+            },
+            input_dtype={"query_shape": "float32", "value_shape": "float32"},
+            expected_output_shape=(2, 64, 768),
+            expected_output_dtype="float32",
+            run_training_check=False,
+        )
