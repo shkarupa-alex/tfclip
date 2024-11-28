@@ -1,56 +1,80 @@
 import numpy as np
-import tensorflow as tf
-from tf_keras import initializers, layers
-from tf_keras.saving import register_keras_serializable
-from tf_keras.src.utils.tf_utils import shape_type_conversion
+from keras.src import backend
+from keras.src import constraints
+from keras.src import initializers
+from keras.src import layers
+from keras.src import ops
+from keras.src.layers.input_spec import InputSpec
+from keras.src.saving import register_keras_serializable
 
 
-@register_keras_serializable(package='TFCLIP')
+@register_keras_serializable(package="TFCLIP")
 class ImageTextSimilarity(layers.Layer):
     def __init__(self, scale_init, bias_init, **kwargs):
         super().__init__(**kwargs)
-        self.input_spec = [layers.InputSpec(ndim=2), layers.InputSpec(ndim=2)]
+        self.input_spec = [InputSpec(ndim=2), InputSpec(ndim=2)]
 
         self.scale_init = scale_init
         self.bias_init = bias_init
 
-    @shape_type_conversion
     def build(self, input_shape):
         # noinspection PyAttributeOutsideInit
         self.scale = self.add_weight(
-            'scale', shape=[],
-            initializer=initializers.constant(self.scale_init),
-            constraint=lambda s: tf.minimum(s, np.log(100., dtype=self.dtype)))
+            name="scale",
+            shape=[],
+            initializer=initializers.Constant(self.scale_init),
+            constraint=MinConstraint(np.log(100.0, dtype=self.dtype)),
+        )
 
         if self.bias_init:
             # noinspection PyAttributeOutsideInit
             self.bias = self.add_weight(
-                'bias', shape=[],
-                initializer=initializers.constant(self.bias_init))
+                name="bias",
+                shape=[],
+                initializer=initializers.Constant(self.bias_init),
+            )
 
         super().build(input_shape)
 
     def call(self, inputs, *args, **kwargs):
         image, text = inputs
 
-        image /= tf.norm(image, axis=-1, keepdims=True)
-        text /= tf.norm(text, axis=-1, keepdims=True)
+        image /= ops.norm(image, axis=-1, keepdims=True)
+        text /= ops.norm(text, axis=-1, keepdims=True)
 
-        outputs = tf.matmul(image * tf.exp(self.scale), text, transpose_b=True)
+        outputs = ops.matmul(
+            image * ops.exp(self.scale), ops.moveaxis(text, -1, -2)
+        )
         if self.bias_init:
             outputs += self.bias
 
         return outputs
 
-    @shape_type_conversion
     def compute_output_shape(self, input_shape):
         return input_shape[0][0], input_shape[1][0]
 
     def get_config(self):
         config = super().get_config()
-        config.update({
-            'scale_init': self.scale_init,
-            'bias_init': self.bias_init,
-        })
+        config.update(
+            {
+                "scale_init": self.scale_init,
+                "bias_init": self.bias_init,
+            }
+        )
 
         return config
+
+
+@register_keras_serializable(package="TFCLIP")
+class MinConstraint(constraints.Constraint):
+    def __init__(self, min_value):
+        self.min_value = min_value
+
+    def __call__(self, w):
+        w = backend.convert_to_tensor(w)
+        w = ops.minimum(w, self.min_value)
+
+        return w
+
+    def get_config(self):
+        return {"min_value": self.min_value}

@@ -1,29 +1,23 @@
-import tensorflow as tf
-from tf_keras.src.testing_infra import test_combinations
+from keras.src import testing
+
 from tfclip.itsim import ImageTextSimilarity
-from testing_utils import layer_multi_io_test
 
 
-@test_combinations.run_all_keras_modes
-class TestImageTextSimilarity(test_combinations.TestCase):
+class TestImageTextSimilarity(testing.TestCase):
     def test_layer(self):
-        layer_multi_io_test(
+        self.run_layer_test(
             ImageTextSimilarity,
-            kwargs={'scale_init': 0.1, 'bias_init': None},
-            input_shapes=[(2, 8)] * 2,
-            input_dtypes=['float32'] * 2,
-            expected_output_shapes=[(None, None)],
-            expected_output_dtypes=['float32']
+            init_kwargs={"scale_init": 0.1, "bias_init": None},
+            input_shape=((2, 8), (2, 8)),
+            input_dtype=("float32", "float32"),
+            expected_output_shape=(2, 2),
+            expected_output_dtype="float32",
         )
-        layer_multi_io_test(
+        self.run_layer_test(
             ImageTextSimilarity,
-            kwargs={'scale_init': 0.1, 'bias_init': 0.1},
-            input_shapes=[(2, 8)] * 2,
-            input_dtypes=['float32'] * 2,
-            expected_output_shapes=[(None, None)],
-            expected_output_dtypes=['float32']
+            init_kwargs={"scale_init": 0.1, "bias_init": 0.1},
+            input_shape=((2, 8), (2, 8)),
+            input_dtype=("float32", "float32"),
+            expected_output_shape=(2, 2),
+            expected_output_dtype="float32",
         )
-
-
-if __name__ == '__main__':
-    tf.test.main()

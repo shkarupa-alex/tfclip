@@ -12,7 +12,7 @@
     "text_cfg": {
         "context_length": 32,
         "vocab_size": 32000,
-        "hub_tokenizer_name": "bert_en_uncased_preprocess/3",
+        "bert_tokenizer_name": "bert_base_en_uncased",
         "tokenizer_kwargs": {
             "strip_sep_token": 102
         },

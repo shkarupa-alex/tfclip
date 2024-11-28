@@ -1,6 +1,6 @@
-tensorflow==2.16.*
-tensorflow-text>=2.16.1
-tensorflow-hub>=0.16.1
-tf_keras>=2.16.0
-numpy>=1.26.0,<2.0.0
-ftfy>=6.1.1
+tensorflow>=2.18.0
+tensorflow-text>=2.18.0
+keras>=3.7.0
+keras-hub>=0.17.0
+numpy>=1.26.0,<2.1.0
+ftfy>=6.3.1
