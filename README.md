@@ -1,11 +1,11 @@
 # tfclip
 
-Keras v3 (TensorFlow v2) port of **OpenCLIP** package.
+Keras v3 (all backends) port of **OpenCLIP** package.
 
 + Based
   on [Original Pytorch implementation](https://github.com/mlfoundations/open_clip).
 + Contains a lof of models and pretrained weights.
-+ Image preprocessing and text tokenization work in graph mode.
++ Image preprocessing and text tokenization work in graph mode (tf.data).
 
 ## Installation
 
@@ -28,8 +28,6 @@ pip install tfclip
    supply weight path like this
    `create_model_and_transforms(..., weights_path='<path_to_weights.h5>')`
 4. OpenAI weights moved to `-quickgelu` models where they should be.
-5. Model `ViT-SO400M-14-SigLIP-384` renamed to `ViT-SO400M-14-SigLIP-378` (
-   384 // 14 * 14 == 378).
 
 ## Examples
 
@@ -84,7 +82,7 @@ text_model = models.Model(model.inputs[1],
 text_features = text_model(texts, training=False)
 text_features /= ops.norm(text_features, axis=-1, keepdims=True)
 
-text_probs = ops.matmul(image_features * 100., text_features, transpose_b=True)
+text_probs = ops.matmul(image_features * 100., ops.moveaxis(text_features, -1, -2))
 text_probs = ops.softmax(text_probs).numpy()
 print('Label probs:',
       text_probs)  # [[2.3066459e-06 3.2963297e-07 1.9622959e-08 9.9999738e-01]]
@@ -93,6 +91,26 @@ print('Label probs:',
 
 ## Models and weights
 
+> [!TIP]
+> Additional models
+> - [Diffusion Feedback Helps CLIP See Better](https://github.com/baaivision/DIVA) 
+    (finetuned visual encoder)
+>   - Fully ported 
+>     - ViT-L-14-quickgelu: diva_metaclip, diva_openai
+>     - ViT-L-14-336-quickgelu: diva_openai (text encoder output does not match openai's one)
+>   - Local weight conversion required (use `convert_weights.py` and provide path to downloaded checkpoint in `force_checkpoint` argument)
+>     - ViT-H-14-quickgelu: diva_dfn5b, diva_metaclip
+>     - ViT-H-14-378-quickgelu: diva_dfn5b
+>     - ViT-SO400M-14-SigLIP: diva_webli
+>     - ViT-SO400M-14-SigLIP-378: diva_webli
+> - [Long-CLIP: Unlocking the Long-Text Capability of CLIP](https://github.com/beichenzbc/Long-CLIP)
+>   - Fully ported 
+>     - ViT-B-16-Long-quickgelu: long_openai
+>     - ViT-B-32-quickgelu: long_openai
+>     - ViT-L-14-Long-quickgelu: long_openai
+>     - ViT-L-14-Long-336-quickgelu: long_openai
+
+
 > [!NOTE]
 > Fully ported
 > - coca_ViT-B-32: laion2b_s13b_b90k, mscoco_finetuned_laion2b_s13b_b90k
@@ -100,36 +118,34 @@ print('Label probs:',
 > - EVA02-B-16: merged2b_s8b_b131k
 > - EVA02-L-14: merged2b_s4b_b131k
 > - EVA02-L-14-336: merged2b_s6b_b61k
-> - ViT-B-16: laion400m_e31, laion400m_e32, laion2b_s34b_b88k,
-    datacomp_xl_s13b_b90k, datacomp_l_s1b_b8k,
-    commonpool_l_clip_s1b_b8k, commonpool_l_laion_s1b_b8k,
-    commonpool_l_image_s1b_b8k, commonpool_l_text_s1b_b8k,
-    commonpool_l_basic_s1b_b8k, commonpool_l_s1b_b8k
+> - ViT-B-16: commonpool_l_basic_s1b_b8k, commonpool_l_clip_s1b_b8k,
+    commonpool_l_image_s1b_b8k, commonpool_l_laion_s1b_b8k,
+    commonpool_l_s1b_b8k, commonpool_l_text_s1b_b8k, datacomp_l_s1b_b8k,
+    datacomp_xl_s13b_b90k, laion2b_s34b_b88k, laion400m_e31, laion400m_e32
 > - ViT-B-16-plus-240: laion400m_e31, laion400m_e32
-> - ViT-B-16-quickgelu: dfn2b, openai, metaclip_400m, metaclip_fullcc
+> - ViT-B-16-quickgelu: dfn2b, metaclip_400m, metaclip_fullcc, openai
 > - ViT-B-16-SigLIP: webli
 > - ViT-B-16-SigLIP-256: webli
 > - ViT-B-16-SigLIP-384: webli
 > - ViT-B-16-SigLIP-512: webli
 > - ViT-B-16-SigLIP-i18n-256: webli
-> - ViT-B-32: laion2b_e16, laion2b_s34b_b79k, datacomp_xl_s13b_b90k,
-    datacomp_m_s128m_b4k, commonpool_m_clip_s128m_b4k,
-    commonpool_m_laion_s128m_b4k, commonpool_m_image_s128m_b4k,
-    commonpool_m_text_s128m_b4k, commonpool_m_basic_s128m_b4k,
-    commonpool_m_s128m_b4k, datacomp_s_s13m_b4k,
-    commonpool_s_clip_s13m_b4k, commonpool_s_laion_s13m_b4k,
-    commonpool_s_image_s13m_b4k, commonpool_s_text_s13m_b4k,
-    commonpool_s_basic_s13m_b4k, commonpool_s_s13m_b4k
+> - ViT-B-32: commonpool_m_basic_s128m_b4k, commonpool_m_clip_s128m_b4k,
+    commonpool_m_image_s128m_b4k, commonpool_m_laion_s128m_b4k,
+    commonpool_m_s128m_b4k, commonpool_m_text_s128m_b4k,
+    commonpool_s_basic_s13m_b4k, commonpool_s_clip_s13m_b4k,
+    commonpool_s_image_s13m_b4k, commonpool_s_laion_s13m_b4k,
+    commonpool_s_s13m_b4k, commonpool_s_text_s13m_b4k, datacomp_m_s128m_b4k,
+    datacomp_s_s13m_b4k, datacomp_xl_s13b_b90k, laion2b_e16, laion2b_s34b_b79k
 > - ViT-B-32-256: datacomp_s34b_b86k
-> - ViT-B-32-quickgelu: openai, laion400m_e31, laion400m_e32, metaclip_400m,
-    metaclip_fullcc
-> - ViT-L-14: laion400m_e31, laion400m_e32, laion2b_s32b_b82k,
-    datacomp_xl_s13b_b90k, commonpool_xl_clip_s13b_b90k,
-    commonpool_xl_laion_s13b_b90k, commonpool_xl_s13b_b90k
+> - ViT-B-32-quickgelu: laion400m_e31, laion400m_e32, metaclip_400m,
+    metaclip_fullcc, openai
+> - ViT-L-14: commonpool_xl_clip_s13b_b90k, commonpool_xl_laion_s13b_b90k,
+    commonpool_xl_s13b_b90k, datacomp_xl_s13b_b90k, laion2b_s32b_b82k,
+    laion400m_e31, laion400m_e32
 > - ViT-L-14-336-quickgelu: openai
 > - ViT-L-14-CLIPA: datacomp1b
 > - ViT-L-14-CLIPA-336: datacomp1b
-> - ViT-L-14-quickgelu: openai, metaclip_400m, metaclip_fullcc
+> - ViT-L-14-quickgelu: dfn2b, metaclip_400m, metaclip_fullcc, openai
 
 > [!WARNING]
 > Local weight conversion required (use `convert_weights.py`)
@@ -143,9 +159,10 @@ print('Label probs:',
 > - ViT-bigG-14-quickgelu: metaclip_fullcc
 > - ViT-g-14: laion2b_s12b_b42k, laion2b_s34b_b88k
 > - ViT-H-14: laion2b_s32b_b79k
+> - ViT-H-14-378-quickgelu: dfn5b
 > - ViT-H-14-CLIPA: datacomp1b
-> - ViT-H-14-CLIPA-336: laion2b, datacomp1b
-> - ViT-H-14-quickgelu: metaclip_fullcc
+> - ViT-H-14-CLIPA-336: datacomp1b, laion2b
+> - ViT-H-14-quickgelu: dfn5b, metaclip_fullcc
 > - ViT-L-16-SigLIP-256: webli
 > - ViT-L-16-SigLIP-384: webli
 > - ViT-SO400M-14-SigLIP: webli

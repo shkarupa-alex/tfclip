@@ -19,6 +19,11 @@ def _pcfg(version="1.0.0", sha256=None, **kwargs):
     }
 
 
+def _pcfg_k3(version="1.0.0", sha256=None, ext=".weights", **kwargs):
+    # OpenAI / OpenCLIP defaults
+    return _pcfg(version=version, sha256=sha256, ext=ext, **kwargs)
+
+
 def _slpcfg(version="1.0.0", sha256=None, **kwargs):
     # SiGLIP defaults
     return {
@@ -227,12 +232,21 @@ _VITL14_quickgelu = dict(
     dfn2b=_pcfg(
         sha256="3506d4e53b02c5c8425a83e9def3c3bc85c33ad2b64f0c3670ed08842c26acd3"
     ),
+    diva_openai=_pcfg_k3(
+        sha256="885b5c3765a326fe8af3359741424d42e24ae0c4a71a2986c6ad24ebba848a78"
+    ),
+    diva_metaclip=_pcfg_k3(
+        sha256="8019a60cf37a994a6806a84cd6a375a97052d735f0ba99647cabc7ee92e57bfa"
+    ),
 )
 
 _VITL14_336_quickgelu = dict(
     # OpenAI models were trained with QuickGELU
     openai=_pcfg(
         sha256="ad628eb668585f44e59fc151da40f2fa47c4d4e32336259f8fc1522ee40088d9"
+    ),
+    diva_openai=_pcfg_k3(
+        sha256="298f2fa66d6bd9d2d73736b6deeeabe0bfff92098955af96dab2c38eaa780cc9"
     ),
 )
 
@@ -243,10 +257,13 @@ _VITH14 = dict(
 _VITH14_quickgelu = dict(
     metaclip_fullcc=_pcfg(),
     dfn5b=_pcfg(resize_mode="squash"),
+    diva_metaclip=_pcfg(),
+    diva_dfn5b=_pcfg(resize_mode="squash"),
 )
 
 _VITH14_378_quickgelu = dict(
     dfn5b=_pcfg(resize_mode="squash"),
+    diva_dfn5b=_pcfg(resize_mode="squash"),
 )
 
 _VITg14 = dict(
@@ -283,13 +300,32 @@ _coca_VITL14 = dict(
 _PRETRAINED = {
     "ViT-B-32": _VITB32,
     "ViT-B-32-256": _VITB32_256,
+    "ViT-B-32-Long-quickgelu": dict(
+        long_openai=_pcfg_k3(
+            sha256="c82500bafa94d0349f576d29e9005ce0b0f0bbbcc1cc6b476fe61bf6024b6f01"
+        ),
+    ),
     "ViT-B-32-quickgelu": _VITB32_quickgelu,
     "ViT-B-16": _VITB16,
+    "ViT-B-16-Long-quickgelu": dict(
+        long_openai=_pcfg_k3(
+            sha256="bde39504da385dc081c25554867267e35cbe7bce8f3ae2e060dab7a71dea3126"
+        ),
+    ),
     "ViT-B-16-quickgelu": _VITB16_quickgelu,
     "ViT-B-16-plus-240": _VITB16_PLUS_240,
     "ViT-L-14": _VITL14,
+    "ViT-L-14-Long-quickgelu": dict(
+        long_openai=_pcfg_k3(
+            sha256="19f83538ef905f5663ef989e2be44d0955692d919dbdee4f6761d54ab53bc4e0"
+        ),
+    ),
+    "ViT-L-14-Long-336-quickgelu": dict(
+        long_openai=_pcfg_k3(
+            sha256="148d6d672735690125383b209c27661c5f7eca357bd36b6065e162c6014d3ca7"
+        ),
+    ),
     "ViT-L-14-quickgelu": _VITL14_quickgelu,
-    # OpenAI models were trained with QuickGELU
     "ViT-L-14-336-quickgelu": _VITL14_336_quickgelu,
     "ViT-H-14": _VITH14,
     "ViT-H-14-quickgelu": _VITH14_quickgelu,
@@ -361,14 +397,16 @@ _PRETRAINED = {
     "ViT-L-16-SigLIP-256": dict(
         webli=_slpcfg(),
     ),
-    "ViT-L-16-SigLIP-378": dict(
+    "ViT-L-16-SigLIP-384": dict(
         webli=_slpcfg(),
     ),
     "ViT-SO400M-14-SigLIP": dict(
         webli=_slpcfg(),
+        diva_webli=_slpcfg(),
     ),
     "ViT-SO400M-14-SigLIP-378": dict(
         webli=_slpcfg(),
+        diva_webli=_slpcfg(),
     ),
     "ViT-SO400M-16-SigLIP-i18n-256": dict(
         webli=_slpcfg(),

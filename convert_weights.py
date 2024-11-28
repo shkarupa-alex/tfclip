@@ -4,6 +4,7 @@ import os
 
 import numpy as np
 import open_clip
+import torch
 from keras.src.utils.file_utils import hash_file
 
 import tfclip
@@ -261,6 +262,12 @@ if "__main__" == __name__:
     parser.add_argument(
         "out_path", type=str, help="Path to save TensorFlow model weights"
     )
+    parser.add_argument(
+        "--force_checkpoint",
+        type=str,
+        default="",
+        help="Model checkpoint to load over default one",
+    )
 
     argv, _ = parser.parse_known_args()
     if not os.path.exists(argv.out_path) or not os.path.isdir(argv.out_path):
@@ -275,6 +282,15 @@ if "__main__" == __name__:
             f"Required combination of model and weights is not available. "
             f"Available weights for {argv.model_name} are: {allowed_weights}"
         )
+
+    if argv.force_checkpoint:
+        if not os.path.exists(argv.force_checkpoint) or not os.path.isfile(
+            argv.force_checkpoint
+        ):
+            raise ValueError(
+                f"Output path does not exist or "
+                f"is not a directory: {argv.out_path}"
+            )
 
     model_tf, _, _ = tfclip.create_model_and_transforms(
         argv.model_name, pretrained=None
@@ -305,15 +321,18 @@ if "__main__" == __name__:
         if "openai" == argv.model_pretrain
         else argv.model_name
     )
-    oc_name = (
-        "ViT-SO400M-14-SigLIP-384"
-        if "ViT-SO400M-14-SigLIP-378" == oc_name
-        else oc_name
-    )
-    model_torch = open_clip.create_model(
-        oc_name, pretrained=argv.model_pretrain
-    )
+    oc_name = oc_name.replace("-Long", "")
+    oc_pretrain = argv.model_pretrain.replace("diva_", "").replace("long_", "")
+
+    model_torch = open_clip.create_model(oc_name, pretrained=oc_pretrain)
     weights_torch = model_torch.state_dict()
+
+    if argv.force_checkpoint:
+        print("Force checkpoint", argv.force_checkpoint)
+        force_weights = torch.load(argv.force_checkpoint, map_location="cpu")
+        assert not set(weights_torch.keys()).difference(force_weights.keys())
+        weights_torch = force_weights
+
     weights_torch = {
         convert_name(k): v.numpy() for k, v in weights_torch.items()
     }
