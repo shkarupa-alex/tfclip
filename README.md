@@ -351,3 +351,21 @@ print('Label probs:',
   year={2023}
 }
 ```
+
+```
+@article{wang2024diffusion,
+      title={Diffusion Feedback Helps CLIP See Better},
+      author={Wang, Wenxuan and Sun, Quan and Zhang, Fan and Tang, Yepeng and Liu, Jing and Wang, Xinlong},
+      journal={arXiv preprint arXiv:2407.20171},
+      year={2024}
+}
+```
+
+```
+@article{zhang2024longclip,
+        title={Long-CLIP: Unlocking the Long-Text Capability of CLIP},
+        author={Beichen Zhang and Pan Zhang and Xiaoyi Dong and Yuhang Zang and Jiaqi Wang},
+        journal={arXiv preprint arXiv:2403.15378},
+        year={2024}
+}
+```
