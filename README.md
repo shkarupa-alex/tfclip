@@ -106,7 +106,7 @@ print('Label probs:',
 > - [Long-CLIP: Unlocking the Long-Text Capability of CLIP](https://github.com/beichenzbc/Long-CLIP)
 >   - Fully ported 
 >     - ViT-B-16-Long-quickgelu: long_openai
->     - ViT-B-32-quickgelu: long_openai
+>     - ViT-B-32-Long-quickgelu: long_openai
 >     - ViT-L-14-Long-quickgelu: long_openai
 >     - ViT-L-14-Long-336-quickgelu: long_openai
 
